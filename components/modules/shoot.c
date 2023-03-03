@@ -30,7 +30,7 @@ static int32_t shoot_block_check(struct shoot *shoot);
   * @param[in]
   * @retval    error code
   */
-int32_t shoot_pid_init(struct shoot *shoot, const char *name, struct pid_param param, enum device_can can)
+int32_t shoot_pid_init(struct shoot *shoot, const char *name, struct pid_param param, enum device_can can, uint16_t can_id)
 {
     char motor_name[OBJECT_NAME_MAX_LEN] = {0};
     uint8_t name_len;
@@ -43,7 +43,7 @@ int32_t shoot_pid_init(struct shoot *shoot, const char *name, struct pid_param p
 
     memcpy(&motor_name, name, name_len);
     shoot->motor.can_periph = can;
-    shoot->motor.can_id = 0x207;
+    shoot->motor.can_id = can_id;
     shoot->motor.init_offset_f = 1;
 
     pid_struct_init(&(shoot->motor_pid), param.max_out, param.integral_limit, param.p, param.i, param.d);

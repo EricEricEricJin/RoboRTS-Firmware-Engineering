@@ -36,7 +36,7 @@ struct pid_param turn_motor_param =
 
 static void shoot_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp);
 
-struct shoot shoot;
+struct shoot shoots[SHOOT_NUM];
 struct rc_device shoot_rc;
 
 int32_t shoot_firction_toggle(shoot_t p_shoot);
@@ -52,9 +52,12 @@ void shoot_task(void const *argument)
 
     rc_device_register(&shoot_rc, "Shoot RC");
 
-    soft_timer_register((soft_timer_callback)shoot_pid_calculate, (void *)&shoot, 5);
-
-    shoot_pid_init(&shoot, "Shoot", turn_motor_param, DEVICE_CAN2);
+    for (int i = 0; i < SHOOT_NUM; i++)
+    {
+        soft_timer_register((soft_timer_callback)shoot_pid_calculate, (void *)&(shoots[i]), 5);
+        shoot_pid_init(&(shoots[i]), "ShootLeft", turn_motor_param, DEVICE_CAN2, 0x207 + i);
+    }    
+    int shoot_select = 0;
 
     while (1)
     {
@@ -63,12 +66,15 @@ void shoot_task(void const *argument)
 
         if (rc_device_get_state(&shoot_rc, RC_S1_MID2UP) == E_OK)
         {
-            shoot_firction_toggle(&shoot);
+            for (int i = 0; i < SHOOT_NUM; i++)
+                shoot_firction_toggle(&(shoots[i]));
         }
 
         if (rc_device_get_state(&shoot_rc, RC_S1_MID2DOWN) == E_OK)
         {
-            shoot_set_cmd(&shoot, SHOOT_ONCE_CMD, 1);
+            shoot_set_cmd(&(shoots[shoot_select++]), SHOOT_ONCE_CMD, 1);
+            if (shoot_select >= SHOOT_NUM)
+                shoot_select = 0;
             shoot_time = get_time_ms();
         }
 
@@ -78,13 +84,15 @@ void shoot_task(void const *argument)
             {
                 if (get_time_ms() - shoot_time > 2500)
                 {
-                    shoot_set_cmd(&shoot, SHOOT_CONTINUOUS_CMD, 0);
+                    for (int i = 0; i < SHOOT_NUM; i++)
+                        shoot_set_cmd(&(shoots[i]), SHOOT_CONTINUOUS_CMD, 0);
                 }
             }
 
             if (rc_device_get_state(&shoot_rc, RC_S1_MID) == E_OK)
             {
-                shoot_set_cmd(&shoot, SHOOT_STOP_CMD, 0);
+                for (int i = 0; i < SHOOT_NUM; i++)
+                    shoot_set_cmd(&(shoots[i]), SHOOT_STOP_CMD, 0);
             }
         }
         osDelay(5);
@@ -98,7 +106,7 @@ int32_t shoot_firction_toggle(shoot_t p_shoot)
     {
         shoot_set_fric_speed(p_shoot, 1000, 1000);
         // Turn off laser
-        __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, 0);
+        // __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, 0);
     }
     else
     {
@@ -106,15 +114,15 @@ int32_t shoot_firction_toggle(shoot_t p_shoot)
         shoot_set_fric_speed(p_shoot, FIRC_MAX_SPEED, FIRC_MAX_SPEED);
 
         // Turn on laser
-        __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, 1999);
+        // __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, 1999);
     }
     toggle = ~toggle;
     return 0;
 }
 
-struct shoot *get_shoot(void)
+struct shoot *get_shoot(int shoot_no)
 {
-    return &shoot;
+    return &(shoots[shoot_no]);
 }
 
 /**

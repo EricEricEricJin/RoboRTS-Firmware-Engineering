@@ -88,7 +88,7 @@ struct shoot
     struct pid motor_pid;
 };
 
-int32_t shoot_pid_init(struct shoot *shoot, const char *name, struct pid_param param, enum device_can can);
+int32_t shoot_pid_init(struct shoot *shoot, const char *name, struct pid_param param, enum device_can can, uint16_t can_id);
 int32_t shoot_set_fric_speed(struct shoot *shoot, uint16_t fric_spd1, uint16_t fric_spd2);
 int32_t shoot_get_fric_speed(struct shoot *shoot, uint16_t *fric_spd1, uint16_t *fric_spd2);
 int32_t shoot_set_cmd(struct shoot *shoot, uint8_t cmd, uint32_t shoot_num);

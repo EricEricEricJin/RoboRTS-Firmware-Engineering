@@ -105,12 +105,11 @@ int32_t shoot_firction_ctrl(uint8_t *buff, uint16_t len)
 
     if (len == sizeof(struct cmd_firction_speed))
     {
-        shoot_t p_shoot;
-        p_shoot = get_shoot();
-
         struct cmd_firction_speed *p_cmd;
         p_cmd = (struct cmd_firction_speed *)buff;
-        shoot_set_fric_speed(p_shoot, p_cmd->left, p_cmd->right);
+
+        for (int i = 0; i < SHOOT_NUM; i++)
+            shoot_set_fric_speed(get_shoot(i), p_cmd->speeds[i], p_cmd->speeds[i]);
 
         offline_event_time_update(OFFLINE_CONTROL_CMD);
     }
@@ -134,9 +133,15 @@ int32_t shoot_num_ctrl(uint8_t *buff, uint16_t len)
         struct cmd_shoot_num *p_cmd;
         p_cmd = (struct cmd_shoot_num *)buff;
         shoot_t p_shoot;
-        p_shoot = get_shoot();
-        shoot_set_cmd(p_shoot, p_cmd->shoot_cmd, p_cmd->shoot_add_num);
-        shoot_set_turn_speed(p_shoot, p_cmd->shoot_freq);
+        for (int i = 0; i < SHOOT_NUM; i++)
+        {
+            p_shoot = get_shoot(i);
+            shoot_set_cmd(p_shoot, p_cmd->shoot_cmd, p_cmd->shoot_add_num);
+            /**
+             * Command need to be modified to control each barrel individually
+            */
+            shoot_set_turn_speed(p_shoot, p_cmd->shoot_freq);
+        }
 
         offline_event_time_update(OFFLINE_CONTROL_CMD);
     }
