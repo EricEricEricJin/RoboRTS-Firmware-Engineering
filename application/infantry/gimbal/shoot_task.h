@@ -24,9 +24,7 @@
     #define SHOOT_TASK_H_EXTERN extern
 #endif
 
-#define SHOOT_NUM 2
-
 void shoot_task(void const *argument);
-struct shoot *get_shoot(int shoot_no);
+struct shoot *get_shoot(void);
 
 #endif // __SHOOT_TASK_H__

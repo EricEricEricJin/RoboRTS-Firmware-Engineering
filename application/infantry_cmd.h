@@ -19,7 +19,6 @@
 #define __INFANTRY_H__
 
 #include "sys.h"
-#include "shoot_task.h"
 
 #define FIRMWARE_VERSION_0 1u
 #define FIRMWARE_VERSION_1 0u
@@ -122,14 +121,11 @@ struct cmd_gimbal_angle
     int16_t yaw;
 };
 
-/*
-Originally here `left` and `right` means the two wheels of one barrel.
-Now Assume for each barrel, its left and wheels are at the same speed.
-*/
 #define CMD_SET_FRICTION_SPEED              (0x0304u)
 struct cmd_firction_speed
 {
-    uint16_t speeds[SHOOT_NUM];
+    uint16_t left;
+    uint16_t right;
 };
 
 #define CMD_SET_SHOOT_FREQUENTCY            (0x0305u)

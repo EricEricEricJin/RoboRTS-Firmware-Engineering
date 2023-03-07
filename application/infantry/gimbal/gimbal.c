@@ -34,7 +34,7 @@ int32_t gimbal_cascade_init(struct gimbal *gimbal, const char *name,
                             struct pid_param pitch_outer_param,
                             enum device_can can)
 {
-    char motor_name[2][OBJECT_NAME_MAX_LEN] = {0};
+    char motor_name[3][OBJECT_NAME_MAX_LEN] = {0};
     uint8_t name_len;
 
     device_assert(gimbal != NULL);
@@ -46,23 +46,28 @@ int32_t gimbal_cascade_init(struct gimbal *gimbal, const char *name,
         name_len = OBJECT_NAME_MAX_LEN / 2;
     }
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         memcpy(&motor_name[i], name, name_len);
     }
     gimbal->yaw_motor.can_periph = can;
     gimbal->yaw_motor.can_id = 0x205;
-    gimbal->pitch_motor.can_periph = can;
-    gimbal->pitch_motor.can_id = 0x206;
+    gimbal->pitch_motor_right.can_periph = can;
+    gimbal->pitch_motor_right.can_id = 0x206;
+    gimbal->pitch_motor_left.can_periph = can;
+    gimbal->pitch_motor_left.can_id = 0x209;
 
     memcpy(&motor_name[YAW_MOTOR_INDEX][name_len], "_YAW\0", 5);
-    memcpy(&motor_name[PITCH_MOTOR_INDEX][name_len], "_PIT\0", 5);
+    memcpy(&motor_name[PITCH_MOTOR_LEFT_INDEX][name_len], "_PIT_L\0", 7);
+    memcpy(&motor_name[PITCH_MOTOR_RIGHT_INDEX][name_len], "_PIT_R\0", 7);
 
     motor_register(&(gimbal->yaw_motor), motor_name[YAW_MOTOR_INDEX]);
-    motor_register(&(gimbal->pitch_motor), motor_name[PITCH_MOTOR_INDEX]);
+    motor_register(&(gimbal->pitch_motor_left), motor_name[PITCH_MOTOR_LEFT_INDEX]);
+    motor_register(&(gimbal->pitch_motor_right), motor_name[PITCH_MOTOR_RIGHT_INDEX]);
 
     memcpy(&motor_name[YAW_MOTOR_INDEX][name_len], "_CTL_Y\0", 7);
-    memcpy(&motor_name[PITCH_MOTOR_INDEX][name_len], "_CTL_P\0", 7);
+    memcpy(&motor_name[PITCH_MOTOR_LEFT_INDEX][name_len], "_CTL_P_L\0", 9);
+    memcpy(&motor_name[PITCH_MOTOR_RIGHT_INDEX][name_len], "_CTL_P_R\0", 9);
 
     gimbal->mode.bit.yaw_mode = ENCODER_MODE;
     pid_struct_init(&(gimbal->yaw_outer_pid), yaw_outer_param.max_out, yaw_outer_param.integral_limit, yaw_outer_param.p, yaw_outer_param.i, yaw_outer_param.d);
@@ -296,7 +301,7 @@ int32_t gimbal_cascade_calculate(struct gimbal *gimbal)
     pdata = motor_get_data(&(gimbal->yaw_motor));
     gimbal->ecd_angle.yaw = YAW_MOTOR_POSITIVE_DIR * gimbal_get_ecd_angle(pdata->ecd, gimbal->param.yaw_ecd_center) / ENCODER_ANGLE_RATIO;
 
-    pdata = motor_get_data(&(gimbal->pitch_motor));
+    pdata = motor_get_data(&(gimbal->pitch_motor_right));
     gimbal->ecd_angle.pitch = PITCH_MOTOR_POSITIVE_DIR * gimbal_get_ecd_angle(pdata->ecd, gimbal->param.pitch_ecd_center) / ENCODER_ANGLE_RATIO;
 
     if (gimbal->mode.bit.yaw_mode == GYRO_MODE)
@@ -341,7 +346,8 @@ int32_t gimbal_cascade_calculate(struct gimbal *gimbal)
     }
 
     motor_out = pid_calculate(&(gimbal->pitch_inter_pid), gimbal->sensor.rate.pitch_rate, outer_out);
-    motor_set_current(&(gimbal->pitch_motor), (int16_t)PITCH_MOTOR_POSITIVE_DIR * motor_out);
+    motor_set_current(&(gimbal->pitch_motor_right), (int16_t)PITCH_MOTOR_POSITIVE_DIR * motor_out);
+    motor_set_current(&(gimbal->pitch_motor_left), (int16_t)PITCH_MOTOR_POSITIVE_DIR * (-motor_out));
 
     return E_OK;
 }

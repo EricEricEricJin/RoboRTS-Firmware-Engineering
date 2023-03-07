@@ -6,7 +6,9 @@
         "ahrs_middleware.h": "c",
         "stm32f4xx_hal.h": "c",
         "stm32f4xx.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "shoot_task.h": "c",
+        "infantry_cmd.h": "c"
     },
     "cortex-debug.openocdPath": "C:\\OPENOCD-20230111-0.12.0\\BIN\\OPENOCD.EXE"
 }

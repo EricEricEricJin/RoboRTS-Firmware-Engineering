@@ -170,8 +170,11 @@ void gimbal_user_key_handle(void)
 
 void gimbal_input_handle(void)
 {
-    for (int i = 0; i < SHOOT_NUM; i++)
-        shoot_state_update(get_shoot(i));
+    shoot_t p_shoot;
+
+    p_shoot = get_shoot();
+
+    shoot_state_update(p_shoot);
 }
 
 void gimbal_dbus_rx_complete(void)
@@ -181,13 +184,14 @@ void gimbal_dbus_rx_complete(void)
 
 void gimbal_online(void)
 {
+    struct shoot *p_shoot;
     struct gimbal *p_gimbal;
+    p_shoot = get_shoot();
     p_gimbal = get_gimbal();
+
+    shoot_enable(p_shoot);
     gimbal_yaw_enable(p_gimbal);
     gimbal_pitch_enable(p_gimbal);
-
-    for (int i = 0; i < SHOOT_NUM; i++)
-        shoot_enable(get_shoot(i));
 }
 
 void gimbal_dbus_online(void)
@@ -197,14 +201,14 @@ void gimbal_dbus_online(void)
 
 void gimbal_offline(void)
 {
+    struct shoot *p_shoot;
     struct gimbal *p_gimbal;
+    p_shoot = get_shoot();
     p_gimbal = get_gimbal();
+
+    shoot_disable(p_shoot);
     gimbal_yaw_disable(p_gimbal);
     gimbal_pitch_disable(p_gimbal);
-
-    for (int i = 0; i < SHOOT_NUM; i++)
-        shoot_disable(get_shoot(i));
-
 }
 
 void gimbal_heart_offline(void)
@@ -216,8 +220,9 @@ void gimbal_heart_offline(void)
     gimbal_set_yaw_mode(p_gimbal, ENCODER_MODE);
     gimbal_set_yaw_angle(p_gimbal, 0, 0);
 
-    for (int i = 0; i < SHOOT_NUM; i++)
-        shoot_disable(get_shoot(i));
+    struct shoot *p_shoot;
+    p_shoot = get_shoot();
+    shoot_disable(p_shoot);
 
     set_gimbal_heart_mode(GIMBAL_HEART_OFF);
     offline_event_enable(OFFLINE_GIMBAL_PITCH);
@@ -232,8 +237,9 @@ void gimbal_heart_online(void)
     //  struct gimbal *p_gimbal;
     //  p_gimbal = get_gimbal();
 
-    for (int i = 0; i < SHOOT_NUM; i++)
-        shoot_enable(get_shoot(i));
+    struct shoot *p_shoot;
+    p_shoot = get_shoot();
+    shoot_enable(p_shoot);
 
     set_gimbal_heart_mode(GIMBAL_HEART_ON);
     offline_event_disable(OFFLINE_GIMBAL_PITCH);

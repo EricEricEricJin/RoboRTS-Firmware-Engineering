@@ -357,25 +357,28 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
   */
 void gimbal_center_adjust(gimbal_t p_gimbal)
 {
-    struct motor_device *p_motor;
+    struct motor_device *p_motor_left, *p_motor_right;
 
-    p_motor = &p_gimbal->pitch_motor;
+    p_motor_left = &p_gimbal->pitch_motor_left;
+    p_motor_right = &p_gimbal->pitch_motor_right;
 
     /* pitch */
     {
         pit_time = get_time_ms();
         while (get_time_ms() - pit_time <= 2000)
         {
-            motor_set_current(p_motor, 8000);
-            pit_ecd_l = p_motor->data.ecd;
+            motor_set_current(p_motor_right, 8000);
+            motor_set_current(p_motor_left, -8000);
+            pit_ecd_l = p_motor_right->data.ecd;
             HAL_Delay(2);
         }
 
         pit_time = HAL_GetTick();
         while (HAL_GetTick() - pit_time <= 2000)
         {
-            motor_set_current(p_motor, -8000);
-            pit_ecd_r = p_motor->data.ecd;
+            motor_set_current(p_motor_right, -8000);
+            motor_set_current(p_motor_left, 8000);
+            pit_ecd_r = p_motor_right->data.ecd;
             HAL_Delay(2);
         }
 
@@ -396,7 +399,7 @@ void gimbal_center_adjust(gimbal_t p_gimbal)
         }
     }
 
-    p_motor = &p_gimbal->yaw_motor;
+    struct motor_device* p_motor = &p_gimbal->yaw_motor;
     /* yaw */
     {
         yaw_time = get_time_ms();

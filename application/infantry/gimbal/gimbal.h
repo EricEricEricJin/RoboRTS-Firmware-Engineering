@@ -53,7 +53,8 @@
 #include "pid.h"
 
 #define YAW_MOTOR_INDEX 0
-#define PITCH_MOTOR_INDEX 1
+#define PITCH_MOTOR_LEFT_INDEX 1
+#define PITCH_MOTOR_RIGHT_INDEX 2
 
 #define GIMBAL_SET_YAW (1<<0u)
 #define GIMBAL_SET_PITCH (1<<1u)
@@ -119,7 +120,8 @@ struct gimbal
     struct pid yaw_inter_pid;
     struct pid yaw_outer_pid;
 
-    struct motor_device pitch_motor;
+    struct motor_device pitch_motor_right;
+    struct motor_device pitch_motor_left;
     struct pid pitch_inter_pid;
     struct pid pitch_outer_pid;
 };

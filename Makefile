@@ -93,13 +93,16 @@ Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
 application/app_manage.c \
-application/chassis/chassis_app.c \
-application/chassis/chassis_cmd.c \
-application/chassis/chassis_task.c \
-application/gimbal/gimbal_app.c \
-application/gimbal/gimbal_cmd.c \
-application/gimbal/gimbal_task.c \
-application/gimbal/shoot_task.c \
+application/infantry/chassis/chassis_app.c \
+application/infantry/chassis/chassis_cmd.c \
+application/infantry/chassis/chassis.c \
+application/infantry/chassis/chassis_task.c \
+application/infantry/gimbal/gimbal_app.c \
+application/infantry/gimbal/gimbal_cmd.c \
+application/infantry/gimbal/gimbal_task.c \
+application/infantry/gimbal/shoot_task.c \
+application/infantry/gimbal/gimbal.c \
+application/infantry/gimbal/shoot.c \
 application/communicate.c \
 application/init.c \
 application/offline_service.c \
@@ -136,9 +139,6 @@ components/easyflash/src/ef_utils.c \
 components/event_mgr/event_mgr.c \
 components/event_mgr/memory_mgr.c \
 components/log/log.c \
-components/modules/chassis.c \
-components/modules/gimbal.c \
-components/modules/shoot.c \
 components/protocol/protocol.c \
 components/protocol/protocol_common.c \
 components/protocol/protocol_interface.c \
@@ -215,8 +215,8 @@ AS_INCLUDES =  \
 C_INCLUDES =  \
 -Iboards \
 -Iapplication \
--Iapplication/chassis \
--Iapplication/gimbal \
+-Iapplication/infantry/chassis \
+-Iapplication/infantry/gimbal \
 -Icomponents/algorithm \
 -Icomponents/bmi088 \
 -Icomponents/bmi088/Include \

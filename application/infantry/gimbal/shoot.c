@@ -308,7 +308,7 @@ static int32_t shoot_fric_ctrl(struct shoot *shoot)
             shoot->fric_spd[0] += 1;
         }
     }
-    else if (shoot->target.fric_spd[1] != shoot->fric_spd[1])
+    if (shoot->target.fric_spd[1] != shoot->fric_spd[1])
     {
         if (shoot->target.fric_spd[1] < shoot->fric_spd[1])
         {

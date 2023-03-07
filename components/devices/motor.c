@@ -44,10 +44,10 @@ int32_t motor_register(motor_device_t motor_dev,
         return -E_EXISTED;
     }
 
-    if ((motor_dev->can_id < 0x201) && (motor_dev->can_id > 0x208))
-    {
-        return -E_ERROR;
-    }
+    // if ((motor_dev->can_id < 0x201) && (motor_dev->can_id > 0x208))
+    // {
+    //     return -E_ERROR;
+    // }
 
     motor_dev->parent.type = DEVICE_MOTOR;
     motor_dev->get_data = get_encoder_data;
@@ -140,8 +140,8 @@ motor_device_t motor_find_by_canid(enum device_can can, uint16_t can_id)
     return NULL;
 }
 
-static uint8_t motor_send_flag[DEVICE_CAN_NUM][2] = {0};
-struct can_msg motor_msg[DEVICE_CAN_NUM][2];
+static uint8_t motor_send_flag[DEVICE_CAN_NUM][3] = {0};
+struct can_msg motor_msg[DEVICE_CAN_NUM][3];
 
 /**
   * @brief  fill motor data(ALL motor)
@@ -175,12 +175,18 @@ void motor_fill_data(void)
                 motor_msg[motor_dev->can_periph][0].data[(motor_dev->can_id - 0x201) * 2 + 1] = motor_dev->current;
                 motor_send_flag[motor_dev->can_periph][0] = 1;
             }
-            else
+            else if (((motor_device_t)object)->can_id <= 0x208)
             {
                 motor_msg[motor_dev->can_periph][1].id = 0x1FF;
                 motor_msg[motor_dev->can_periph][1].data[(motor_dev->can_id - 0x205) * 2] = motor_dev->current >> 8;
                 motor_msg[motor_dev->can_periph][1].data[(motor_dev->can_id - 0x205) * 2 + 1] = motor_dev->current;
                 motor_send_flag[motor_dev->can_periph][1] = 1;
+            }
+            else {
+                motor_msg[motor_dev->can_periph][2].id = 0x2FF;
+                motor_msg[motor_dev->can_periph][2].data[(motor_dev->can_id - 0x209) * 2] = motor_dev->current >> 8;
+                motor_msg[motor_dev->can_periph][2].data[(motor_dev->can_id - 0x209) * 2 + 1] = motor_dev->current;
+                motor_send_flag[motor_dev->can_periph][2] = 1;
             }
         }
     }
@@ -196,7 +202,7 @@ int32_t motor_can_output(enum device_can m_can)
     motor_fill_data();
     if (m_can == DEVICE_CAN_ALL)
     {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
         {
             for (enum device_can e_can = DEVICE_CAN1; e_can != DEVICE_CAN_ALL; e_can++)
             {
@@ -213,7 +219,7 @@ int32_t motor_can_output(enum device_can m_can)
     }
     else
     {
-        for (int j = 0; j < 2; j++)
+        for (int j = 0; j < 3; j++)
         {
             if (motor_send_flag[m_can][j] == 1)
             {
