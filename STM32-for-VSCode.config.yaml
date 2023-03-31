@@ -76,6 +76,9 @@ excludes:
 # If a CubeMX makefile is present it will automatically include the include directories from that makefile.
 includeDirectories: 
   - $$(dirname $<)
+  - boards
+  - application
+  - components/**
 
 # Files that should be included in the compilation.
 # If a CubeMX makefile is present it will automatically include the  c and cpp/cxx files from that makefile.
@@ -83,6 +86,10 @@ includeDirectories:
 # Do mind that double stars are reserved in yaml
 # these should be escaped with a: \ or the name should be in double quotes e.g. "HARDWARE_DRIVER*.c"
 sourceFiles:  
+  - application/**/*.c
+  - boards/**/*.c
+  - components/**/*.c
+
 
 
 # When no makefile is present it will show a warning pop-up.

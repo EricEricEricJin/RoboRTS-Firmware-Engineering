@@ -150,10 +150,10 @@ components/soft_timer/soft_timer.c \
 components/support/fifo.c \
 components/support/mem_mang4.c \
 components/support/mf_crc.c \
-components/systemView/SEGGER_RTT.c \
-components/systemView/SEGGER_SYSVIEW.c \
-components/systemView/SEGGER_SYSVIEW_Config_FreeRTOS.c \
-components/systemView/SEGGER_SYSVIEW_FreeRTOS.c
+components/systemview/SEGGER_RTT.c \
+components/systemview/SEGGER_SYSVIEW.c \
+components/systemview/SEGGER_SYSVIEW_Config_FreeRTOS.c \
+components/systemview/SEGGER_SYSVIEW_FreeRTOS.c
 
 
 CPP_SOURCES = \
@@ -250,12 +250,11 @@ C_INCLUDES =  \
 -Icomponents/easyflash/inc \
 -Icomponents/event_mgr \
 -Icomponents/log \
--Icomponents/modules \
 -Icomponents/protocol \
 -Icomponents/referee \
 -Icomponents/soft_timer \
 -Icomponents/support \
--Icomponents/systemView
+-Icomponents/systemview
 
 
 

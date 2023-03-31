@@ -26,12 +26,11 @@
         "components/easyflash/inc",
         "components/event_mgr",
         "components/log",
-        "components/modules",
         "components/protocol",
         "components/referee",
         "components/soft_timer",
         "components/support",
-        "components/systemView"
+        "components/systemview"
       ],
       "defines": [
         "ARM_MATH_CM4",
