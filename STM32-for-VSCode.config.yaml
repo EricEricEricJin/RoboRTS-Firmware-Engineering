@@ -77,7 +77,7 @@ excludes:
 includeDirectories: 
   - $$(dirname $<)
   - boards
-  - application
+  - application/**
   - components/**
 
 # Files that should be included in the compilation.
@@ -87,7 +87,7 @@ includeDirectories:
 # these should be escaped with a: \ or the name should be in double quotes e.g. "HARDWARE_DRIVER*.c"
 sourceFiles:  
   - application/*.c
-  - application/infantry/**/*.c # APP
+  - application/**/*.c # APP
   - boards/**/*.c
   - components/**/*.c
 

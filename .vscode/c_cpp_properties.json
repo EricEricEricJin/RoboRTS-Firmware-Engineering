@@ -17,6 +17,8 @@
         "USB_DEVICE/App",
         "USB_DEVICE/Target",
         "application",
+        "application/chassis",
+        "application/gimbal",
         "boards",
         "components/algorithm",
         "components/bmi088",

@@ -20,7 +20,7 @@
 
 #include "sys.h"
 
-void infantry_gimbal_app_init(void);
+void gimbal_app_init(void);
 
 
 #endif // __GIMBAL_APP_H__
