@@ -87,7 +87,7 @@ struct route_obj gimbal_route_table[] =
   * @param
   * @retval void
   */
-void gimbal_app_init(void)
+void infantry_gimbal_app_init(void)
 {
     struct app_manage *app;
     gimbal_t p_gimbal;

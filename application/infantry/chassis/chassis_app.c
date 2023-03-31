@@ -84,7 +84,7 @@ struct route_obj chassis_route_table[] =
   * @param
   * @retval void
   */
-void chassis_app_init(void)
+void infantry_chassis_app_init(void)
 {
     struct app_manage *app;
     chassis_t p_chassis;

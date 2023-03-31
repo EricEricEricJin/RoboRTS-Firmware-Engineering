@@ -215,8 +215,6 @@ AS_INCLUDES =  \
 C_INCLUDES =  \
 -Iboards \
 -Iapplication \
--Iapplication/infantry/chassis \
--Iapplication/infantry/gimbal \
 -Icomponents/algorithm \
 -Icomponents/bmi088 \
 -Icomponents/bmi088/Include \

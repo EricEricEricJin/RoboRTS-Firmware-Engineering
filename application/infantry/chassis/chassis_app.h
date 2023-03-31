@@ -22,7 +22,7 @@
 #include "app_manage.h"
 #include "chassis.h"
 
-void chassis_app_init(void);
+void infantry_chassis_app_init(void);
 
 #endif
 

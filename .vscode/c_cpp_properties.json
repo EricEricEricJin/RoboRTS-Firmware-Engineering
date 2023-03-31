@@ -3,6 +3,7 @@
     {
       "name": "STM32",
       "includePath": [
+        "$$(dirname $<)",
         "Core/Inc",
         "Drivers/CMSIS/Device/ST/STM32F4xx/Include",
         "Drivers/CMSIS/Include",
@@ -16,8 +17,6 @@
         "USB_DEVICE/App",
         "USB_DEVICE/Target",
         "application",
-        "application/infantry/chassis",
-        "application/infantry/gimbal",
         "boards",
         "components/algorithm",
         "components/bmi088",

@@ -29,8 +29,8 @@
 #include "communicate.h"
 #include "offline_service.h"
 
-#include "chassis_app.h"
-#include "gimbal_app.h"
+#include "infantry/chassis/chassis_app.h"
+#include "infantry/gimbal/gimbal_app.h"
 
 #include "SEGGER_SYSVIEW.h"
 
@@ -47,11 +47,11 @@ void task_init(void)
     app = get_sys_cfg();
     if (app == CHASSIS_APP)
     {
-        chassis_app_init();
+        infantry_chassis_app_init();
     }
     else
     {
-        gimbal_app_init();
+        infantry_gimbal_app_init();
         // myapp_app_init();
     }
     app_protocol_init();
