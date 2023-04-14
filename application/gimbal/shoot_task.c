@@ -66,8 +66,13 @@ void shoot_task(void const *argument)
             shoot_firction_toggle(&shoot);
         }
 
-        if (rc_device_get_state(&shoot_rc, RC_S1_MID2DOWN) == E_OK)
-        {
+        // if (rc_device_get_state(&shoot_rc, RC_S1_MID2DOWN) == E_OK)
+        // {
+        //     shoot_set_cmd(&shoot, SHOOT_ONCE_CMD, 1);
+        //     shoot_time = get_time_ms();
+        // }
+        int16_t wheel = shoot_rc.rc_info.wheel;
+        if (wheel > 330) {
             shoot_set_cmd(&shoot, SHOOT_ONCE_CMD, 1);
             shoot_time = get_time_ms();
         }

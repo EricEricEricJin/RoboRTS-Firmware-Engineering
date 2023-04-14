@@ -60,7 +60,7 @@ int32_t rc_device_get_state(rc_device_t rc_dev, uint16_t state)
     {
         if ((rc_dev->state & state) == state)
         {
-            rc_dev->state &= (~(state & 0x00FF));
+            rc_dev->state &= (~(state & 0x00FF)); // ~: binary one's component
             exit_critical();
             return E_OK;
         }
