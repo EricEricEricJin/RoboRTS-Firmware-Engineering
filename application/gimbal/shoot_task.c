@@ -26,12 +26,14 @@
 
 #include "tim.h"
 
+#include "log.h"
+
 struct pid_param turn_motor_param =
-{
-    .p = 10.0f,
-    .i = 0.3f,
-    .max_out = 30000,
-    .integral_limit = 10000,
+    {
+        .p = 10.0f,
+        .i = 0.3f,
+        .max_out = 30000,
+        .integral_limit = 10000,
 };
 
 static void shoot_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp);
@@ -56,6 +58,8 @@ void shoot_task(void const *argument)
 
     shoot_pid_init(&shoot, "Shoot", turn_motor_param, DEVICE_CAN2, 0x207);
 
+    int is_shooting = 0;
+
     while (1)
     {
         /* dr16 data update */
@@ -65,33 +69,47 @@ void shoot_task(void const *argument)
         {
             shoot_firction_toggle(&shoot);
         }
+        else if (rc_device_get_state(&shoot_rc, RC_S1_UP2MID) == E_OK)
+        {
+            shoot_set_cmd(&shoot, SHOOT_STOP_CMD, 0);
+        }
 
         // if (rc_device_get_state(&shoot_rc, RC_S1_MID2DOWN) == E_OK)
         // {
         //     shoot_set_cmd(&shoot, SHOOT_ONCE_CMD, 1);
         //     shoot_time = get_time_ms();
         // }
+
+        // get side wheel level
         int16_t wheel = shoot_rc.rc_info.wheel;
-        if (wheel > 330) {
-            shoot_set_cmd(&shoot, SHOOT_ONCE_CMD, 1);
-            shoot_time = get_time_ms();
-        }
+        // log_i("wheel value: %d.", wheel);
 
-        if (rc_device_get_state(&shoot_rc, RC_S2_DOWN) != E_OK)
+        if (wheel > 330 && !is_shooting)
         {
-            if (rc_device_get_state(&shoot_rc, RC_S1_DOWN) == E_OK)
-            {
-                if (get_time_ms() - shoot_time > 2500)
-                {
-                    shoot_set_cmd(&shoot, SHOOT_CONTINUOUS_CMD, 0);
-                }
-            }
-
-            if (rc_device_get_state(&shoot_rc, RC_S1_MID) == E_OK)
-            {
-                shoot_set_cmd(&shoot, SHOOT_STOP_CMD, 0);
-            }
+            shoot_set_cmd(&shoot, SHOOT_CONTINUOUS_CMD, 0);
+            is_shooting = 1;
         }
+        else if (wheel < 330 && is_shooting)
+        {
+            shoot_set_cmd(&shoot, SHOOT_ONCE_CMD, 0);
+            is_shooting = 0;
+        }
+
+        // if (rc_device_get_state(&shoot_rc, RC_S2_DOWN) != E_OK)
+        // {
+        //     if (rc_device_get_state(&shoot_rc, RC_S1_DOWN) == E_OK)
+        //     {
+        //         if (get_time_ms() - shoot_time > 2500)
+        //         {
+        //             shoot_set_cmd(&shoot, SHOOT_CONTINUOUS_CMD, 0);
+        //         }
+        //     }
+
+        //     if (rc_device_get_state(&shoot_rc, RC_S1_MID) == E_OK)
+        //     {
+        //         shoot_set_cmd(&shoot, SHOOT_STOP_CMD, 0);
+        //     }
+        // }
         osDelay(5);
     }
 }
@@ -123,10 +141,10 @@ struct shoot *get_shoot(void)
 }
 
 /**
-  * @brief  subscrib dr16 event, update
-  * @param
-  * @retval void
-  */
+ * @brief  subscrib dr16 event, update
+ * @param
+ * @retval void
+ */
 static void shoot_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp)
 {
     rc_device_date_update(&shoot_rc, pMsgData);
