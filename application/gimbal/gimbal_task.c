@@ -306,8 +306,8 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
     {
         gimbal_set_yaw_mode(p_gimbal, GYRO_MODE);
 
-        pit_delta = (float)p_info->ch4 * 0.0008f;
-        yaw_delta = -(float)p_info->ch3 * 0.0015f;
+        pit_delta = (float)p_info->ch4 * 0.0008f; // left y
+        yaw_delta = -(float)p_info->ch1 * 0.0015f; // right x
         gimbal_set_pitch_delta(p_gimbal, pit_delta);
         gimbal_set_yaw_delta(p_gimbal, yaw_delta);
     }
@@ -316,7 +316,7 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
     if (rc_device_get_state(p_rc, RC_S2_MID) == E_OK)
     {
         gimbal_set_yaw_mode(p_gimbal, ENCODER_MODE);
-        pit_delta = (float)p_info->ch4 * 0.0008f;
+        pit_delta = (float)p_info->ch4 * 0.0008f; // left y
         gimbal_set_pitch_delta(p_gimbal, pit_delta);
 
         if (rc_device_get_state(p_rc, RC_S2_UP2MID) == E_OK)

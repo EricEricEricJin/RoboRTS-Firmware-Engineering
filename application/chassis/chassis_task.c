@@ -82,8 +82,8 @@ void chassis_task(void const *argument)
 
         if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
         {
-            vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-            vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
+            vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED; // left x
+            vy = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VY_SPEED; // right y
             wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
             chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
             chassis_set_acc(&chassis, 0, 0, 0);
@@ -93,8 +93,9 @@ void chassis_task(void const *argument)
         if (rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
         {
             vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-            vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
-            wz = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VW_SPEED;
+            vy = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VY_SPEED;
+            wz = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VW_SPEED;
+
             chassis_set_offset(&chassis, 0, 0);
             chassis_set_acc(&chassis, 0, 0, 0);
             chassis_set_speed(&chassis, vx, vy, wz);
