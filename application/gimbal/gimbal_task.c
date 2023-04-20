@@ -30,6 +30,8 @@
 #include "single_gyro.h"
 #include "offline_service.h"
 
+#include "init.h"
+
 /* patrol period time (ms) */
 #define GIMBAL_PERIOD 5
 /* gimbal back center time (ms) */
@@ -83,19 +85,21 @@ struct pid_param yaw_inter_param =
         .integral_limit = 3000,
 };
 
-struct pid_param pitch_outer_param =
-    {
-        .p = 60.0f,
-        .max_out = 2000,
-};
+struct pid_param pitch_outer_param;
+//  =
+//     {
+//         .p = 60.0f,
+//         .max_out = 2000,
+// };
 
-struct pid_param pitch_inter_param =
-    {
-        .p = 100.0f,
-        .i = 0.1f,
-        .max_out = 30000,
-        .integral_limit = 3000,
-};
+struct pid_param pitch_inter_param;
+//  =
+//     {
+//         .p = 100.0f,
+//         .i = 0.1f,
+//         .max_out = 30000,
+//         .integral_limit = 3000,
+// };
 
 #endif
 
@@ -136,6 +140,28 @@ static void gimbal_init_handle(gimbal_t p_gimbal);
 
 void gimbal_task(void const *argument)
 {
+    uint8_t pid_cfg = get_pid_cfg();
+    if (pid_cfg == NOJMP_PID)
+    {
+        pitch_outer_param.p = 60.0f;
+        pitch_outer_param.max_out = 2000;
+
+        pitch_inter_param.p = 100.0f;
+        pitch_inter_param.i = 0.1f;
+        pitch_inter_param.max_out = 30000;
+        pitch_inter_param.integral_limit = 3000;
+    }
+    else
+    {
+        pitch_outer_param.p = 60.0f;
+        pitch_outer_param.max_out = 2000;
+
+        pitch_inter_param.p = 100.0f;
+        pitch_inter_param.i = 0.1f;
+        pitch_inter_param.max_out = 30000;
+        pitch_inter_param.integral_limit = 3000;
+    }
+
     uint32_t period = osKernelSysTick();
 
     size_t read_len = 0;
@@ -304,10 +330,19 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
     if (rc_device_get_state(p_rc, RC_S2_UP) == E_OK)
     {
         gimbal_set_yaw_mode(p_gimbal, GYRO_MODE);
-        local_ch4 = p_info->ch4;
-        DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
-        pit_delta = local_ch4 * 0.5f;              // left y
-        yaw_delta = -(float)p_info->ch1 * 0.0015f; // right x
+        if (get_driver_cfg() == NOJMP_DRIVER)
+        {
+            pit_delta = -(float)p_info->ch4 * 0.0015f;
+            yaw_delta = -(float)p_info->ch3 * 0.0015f;
+        }
+        else
+        {
+            local_ch4 = p_info->ch4;
+            DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
+            pit_delta = local_ch4 * 0.5f;              // left y
+            yaw_delta = -(float)p_info->ch1 * 0.0015f; // right x
+        }
+
         gimbal_set_pitch_delta(p_gimbal, pit_delta);
         gimbal_set_yaw_delta(p_gimbal, yaw_delta);
     }
@@ -316,9 +351,18 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
     if (rc_device_get_state(p_rc, RC_S2_MID) == E_OK)
     {
         gimbal_set_yaw_mode(p_gimbal, ENCODER_MODE);
-        local_ch4 = p_info->ch4;
-        DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
-        pit_delta = local_ch4 * 0.5f; // left y
+
+        if (get_driver_cfg() == NOJMP_DRIVER)
+        {
+            pit_delta = -(float)p_info->ch4 * 0.0015f;
+        }
+        else
+        {
+            local_ch4 = p_info->ch4;
+            DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
+            pit_delta = local_ch4 * 0.5f; // left y
+        }
+
         gimbal_set_pitch_delta(p_gimbal, pit_delta);
 
         if (rc_device_get_state(p_rc, RC_S2_UP2MID) == E_OK)

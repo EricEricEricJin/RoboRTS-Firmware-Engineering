@@ -25,6 +25,7 @@
 #include "event.h"
 #include "chassis.h"
 #include "offline_service.h"
+#include "init.h"
 
 struct pid_param chassis_motor_param =
     {
@@ -85,10 +86,19 @@ void chassis_task(void const *argument)
 
         if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
         {
-            local_ch3 = p_rc_info->ch3;
-            DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
-            vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED; // left x
-            vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;                  // right y
+            if (get_driver_cfg() == NOJMP_DRIVER)
+            {
+                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+                vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
+            }
+            else
+            {
+                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED; // left x
+                local_ch3 = p_rc_info->ch3;
+                DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
+                vy = -local_ch3 * MAX_CHASSIS_VY_SPEED; // right y
+            }
+
             wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
             chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
             chassis_set_acc(&chassis, 0, 0, 0);
@@ -97,11 +107,20 @@ void chassis_task(void const *argument)
 
         if (rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
         {
-            local_ch3 = p_rc_info->ch3;
-            DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
-            vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-            vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;
-            wz = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VW_SPEED;
+            if (get_driver_cfg() == NOJMP_DRIVER)
+            {
+                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+                vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
+                wz = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VW_SPEED;
+            }
+            else
+            {
+                local_ch3 = p_rc_info->ch3;
+                DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
+                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+                vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;
+                wz = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VW_SPEED;
+            }
 
             chassis_set_offset(&chassis, 0, 0);
             chassis_set_acc(&chassis, 0, 0, 0);

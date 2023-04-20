@@ -37,6 +37,8 @@
 #include "log.h"
 
 static uint8_t glb_sys_cfg;
+static uint8_t glb_driver_cfg;
+static uint8_t glb_pid_cfg;
 
 void system_config(void);
 void hw_init(void);
@@ -79,10 +81,10 @@ void vApplicationMallocFailedHook(void)
 }
 
 /**
-  * @brief  all task init. This thread is called in main.c
-  * @param
-  * @retval void
-  */
+ * @brief  all task init. This thread is called in main.c
+ * @param
+ * @retval void
+ */
 void services_task(void const *argument)
 {
     /* init code for USB_DEVICE */
@@ -105,6 +107,8 @@ void services_task(void const *argument)
 void system_config(void)
 {
     glb_sys_cfg = HAL_GPIO_ReadPin(APP_CONFIG_GPIO_Port, APP_CONFIG_Pin);
+    glb_driver_cfg = HAL_GPIO_ReadPin(DRIVER_CONFIG_GPIO_Port, DRIVER_CONFIG_Pin);
+    glb_pid_cfg = HAL_GPIO_ReadPin(PID_CONFIG_GPIO_Port, PID_CONFIG_Pin);
 }
 
 void hw_init(void)
@@ -117,4 +121,14 @@ void hw_init(void)
 uint8_t get_sys_cfg(void)
 {
     return glb_sys_cfg;
+}
+
+uint8_t get_driver_cfg(void)
+{
+    return glb_driver_cfg;
+}
+
+uint8_t get_pid_cfg(void)
+{
+    return glb_pid_cfg;
 }
