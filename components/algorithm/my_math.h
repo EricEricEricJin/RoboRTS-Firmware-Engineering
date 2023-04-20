@@ -4,13 +4,30 @@
 /* math relevant */
 /* radian coefficient */
 #ifndef RADIAN_COEF
-    #define RADIAN_COEF 57.3f
+#define RADIAN_COEF 57.3f
 #endif
 
 /* circumference ratio */
 #ifndef PI
-    #define PI 3.14159265354f
+#define PI 3.14159265354f
 #endif
+
+#define DEAD_ZONE(val, max, dz)                              \
+  do                                                         \
+  {                                                          \
+    if ((val) > (dz))                                        \
+    {                                                        \
+      (val) = (float)((val) - (dz)) / (float)((max) - (dz)); \
+    }                                                        \
+    else if ((val) < -(dz))                                  \
+    {                                                        \
+      (val) = (float)((val) + (dz)) / (float)((max) - (dz)); \
+    }                                                        \
+    else                                                     \
+    {                                                        \
+      (val) = 0;                                             \
+    }                                                        \
+  } while (0)
 
 #define VAL_LIMIT(val, min, max) \
   do                             \
@@ -37,7 +54,7 @@
   {                                 \
     (val) = (angle) - (int)(angle); \
     (val) += (int)(angle) % 360;    \
-    if((val)>180)                   \
+    if ((val) > 180)                \
       (val) -= 360;                 \
   } while (0)
 

@@ -40,66 +40,64 @@
 #ifdef ICRA2019
 
 struct pid_param yaw_outer_param =
-{
-    .p = 50.0f,
-    .max_out = 2000.0f,
+    {
+        .p = 50.0f,
+        .max_out = 2000.0f,
 };
 
 struct pid_param yaw_inter_param =
-{
-    .p = 70.0f,
-    .i = 0.2f,
-    .max_out = 30000,
-    .integral_limit = 3000,
+    {
+        .p = 70.0f,
+        .i = 0.2f,
+        .max_out = 30000,
+        .integral_limit = 3000,
 };
 
 struct pid_param pitch_outer_param =
-{
-    .p = 30.0f,
-    .max_out = 2000,
+    {
+        .p = 30.0f,
+        .max_out = 2000,
 };
 
 struct pid_param pitch_inter_param =
-{
-    .p = 65.0f,
-    .i = 0.2f,
-    .max_out = 30000,
-    .integral_limit = 3000,
+    {
+        .p = 65.0f,
+        .i = 0.2f,
+        .max_out = 30000,
+        .integral_limit = 3000,
 };
 
 #else
 
 struct pid_param yaw_outer_param =
-{
-    .p = 25.0f,
-    .max_out = 2000.0f,
+    {
+        .p = 25.0f,
+        .max_out = 2000.0f,
 };
 
 struct pid_param yaw_inter_param =
-{
-    .p = 100.0f,
-    .i = 0.3f,
-    .max_out = 30000,
-    .integral_limit = 3000,
+    {
+        .p = 100.0f,
+        .i = 0.3f,
+        .max_out = 30000,
+        .integral_limit = 3000,
 };
 
 struct pid_param pitch_outer_param =
-{
-    .p = 60.0f,
-    .max_out = 2000,
+    {
+        .p = 60.0f,
+        .max_out = 2000,
 };
 
 struct pid_param pitch_inter_param =
-{
-    .p = 100.0f,
-    .i = 0.1f,
-    .max_out = 30000,
-    .integral_limit = 3000,
+    {
+        .p = 100.0f,
+        .i = 0.1f,
+        .max_out = 30000,
+        .integral_limit = 3000,
 };
 
 #endif
-
-
 
 void gimbal_center_adjust(gimbal_t p_gimbal);
 void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struct rc_info *p_info);
@@ -121,6 +119,7 @@ struct gimbal_param center_param;
 struct ahrs_sensor gimbal_gyro;
 
 float pit_delta, yaw_delta;
+float local_ch4;
 
 /* control ramp parameter */
 static ramp_v0_t yaw_ramp = RAMP_GEN_DAFAULT;
@@ -208,11 +207,9 @@ void gimbal_task(void const *argument)
             gimbal_init_handle(&gimbal);
             gimbal_cascade_calculate(&gimbal);
         }
-        case YAW_DEBUG_MODE:
-            ;
+        case YAW_DEBUG_MODE:;
             break;
-        case PITCH_DEBUG_MODE:
-            ;
+        case PITCH_DEBUG_MODE:;
             break;
         };
 
@@ -237,10 +234,10 @@ void gimbal_gyro_yaw_update(uint16_t std_id, uint8_t *data)
 }
 
 /**
-  * @brief  gimbal cold boot
-  * @param
-  * @retval void
-  */
+ * @brief  gimbal cold boot
+ * @param
+ * @retval void
+ */
 void gimbal_init_start(void)
 {
     ramp_v0_init(&pitch_ramp, BACK_CENTER_TIME / GIMBAL_PERIOD);
@@ -251,10 +248,10 @@ void gimbal_init_start(void)
 #define ANGLE_ABS(x) ((x) > 0 ? (x) : (-(x)))
 
 /**
-  * @brief  init status handle
-  * @param
-  * @retval void
-  */
+ * @brief  init status handle
+ * @param
+ * @retval void
+ */
 static void gimbal_init_handle(gimbal_t p_gimbal)
 {
     gimbal_set_pitch_mode(p_gimbal, ENCODER_MODE);
@@ -277,10 +274,10 @@ static void gimbal_init_handle(gimbal_t p_gimbal)
 }
 
 /**
-* @brief  work mode: normal/adjust
-  * @param
-  * @retval void
-  */
+ * @brief  work mode: normal/adjust
+ * @param
+ * @retval void
+ */
 void gimbal_set_work_mode(uint8_t mode)
 {
     gimbal_mode = mode;
@@ -291,11 +288,13 @@ uint8_t gimbal_get_work_mode(void)
     return gimbal_mode;
 }
 
+#define PITCH_MOVE_DZ 120
+
 /**
-  * @brief  normal status handle
-  * @param
-  * @retval void
-  */
+ * @brief  normal status handle
+ * @param
+ * @retval void
+ */
 void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struct rc_info *p_info)
 {
 #ifdef ICRA2019
@@ -305,8 +304,9 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
     if (rc_device_get_state(p_rc, RC_S2_UP) == E_OK)
     {
         gimbal_set_yaw_mode(p_gimbal, GYRO_MODE);
-
-        pit_delta = (float)p_info->ch4 * 0.0008f; // left y
+        local_ch4 = p_info->ch4;
+        DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
+        pit_delta = local_ch4 * 0.5f;              // left y
         yaw_delta = -(float)p_info->ch1 * 0.0015f; // right x
         gimbal_set_pitch_delta(p_gimbal, pit_delta);
         gimbal_set_yaw_delta(p_gimbal, yaw_delta);
@@ -316,7 +316,9 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
     if (rc_device_get_state(p_rc, RC_S2_MID) == E_OK)
     {
         gimbal_set_yaw_mode(p_gimbal, ENCODER_MODE);
-        pit_delta = (float)p_info->ch4 * 0.0008f; // left y
+        local_ch4 = p_info->ch4;
+        DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
+        pit_delta = local_ch4 * 0.5f; // left y
         gimbal_set_pitch_delta(p_gimbal, pit_delta);
 
         if (rc_device_get_state(p_rc, RC_S2_UP2MID) == E_OK)
@@ -352,10 +354,10 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
 }
 
 /**
-  * @brief  encoder center value auto initialize.
-  * @param
-  * @retval void
-  */
+ * @brief  encoder center value auto initialize.
+ * @param
+ * @retval void
+ */
 void gimbal_center_adjust(gimbal_t p_gimbal)
 {
     struct motor_device *p_motor_left, *p_motor_right;
@@ -400,7 +402,7 @@ void gimbal_center_adjust(gimbal_t p_gimbal)
         }
     }
 
-    struct motor_device* p_motor = &p_gimbal->yaw_motor;
+    struct motor_device *p_motor = &p_gimbal->yaw_motor;
     /* yaw */
     {
         yaw_time = get_time_ms();
@@ -451,10 +453,10 @@ struct gimbal *get_gimbal(void)
 }
 
 /**
-  * @brief  subscrib dr16 event, update
-  * @param
-  * @retval void
-  */
+ * @brief  subscrib dr16 event, update
+ * @param
+ * @retval void
+ */
 static void gimbal_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp)
 {
     rc_device_date_update(&gimbal_rc, pMsgData);

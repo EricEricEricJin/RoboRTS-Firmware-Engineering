@@ -27,12 +27,14 @@
 #include "offline_service.h"
 
 struct pid_param chassis_motor_param =
-{
-    .p = 6.5f,
-    .i = 0.1f,
-    .max_out = 15000,
-    .integral_limit = 500,
+    {
+        .p = 6.5f,
+        .i = 0.1f,
+        .max_out = 15000,
+        .integral_limit = 500,
 };
+
+#define Y_MOVE_DZ 0
 
 static void chassis_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp);
 static int32_t chassis_angle_broadcast(void *argv);
@@ -71,6 +73,7 @@ void chassis_task(void const *argument)
 
     pid_struct_init(&pid_follow, MAX_CHASSIS_VW_SPEED, 50, 8.0f, 0.0f, 2.0f);
 
+    float local_ch3;
     while (1)
     {
         /* dr16 data update */
@@ -82,8 +85,10 @@ void chassis_task(void const *argument)
 
         if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
         {
+            local_ch3 = p_rc_info->ch3;
+            DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
             vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED; // left x
-            vy = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VY_SPEED; // right y
+            vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;                  // right y
             wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
             chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
             chassis_set_acc(&chassis, 0, 0, 0);
@@ -92,8 +97,10 @@ void chassis_task(void const *argument)
 
         if (rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
         {
+            local_ch3 = p_rc_info->ch3;
+            DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
             vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-            vy = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VY_SPEED;
+            vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;
             wz = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VW_SPEED;
 
             chassis_set_offset(&chassis, 0, 0);
@@ -148,10 +155,10 @@ void chassis_task(void const *argument)
 }
 
 /**
-  * @brief  send chassis angle to gimbal
-  * @param
-  * @retval void
-  */
+ * @brief  send chassis angle to gimbal
+ * @param
+ * @retval void
+ */
 int32_t chassis_angle_broadcast(void *argv)
 {
     int32_t s_yaw, s_yaw_rate;
@@ -179,20 +186,20 @@ struct chassis *get_chassis(void)
 }
 
 /**
-  * @brief  subscrib dr16 event, update
-  * @param
-  * @retval void
-  */
+ * @brief  subscrib dr16 event, update
+ * @param
+ * @retval void
+ */
 static void chassis_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp)
 {
     rc_device_date_update(&chassis_rc, pMsgData);
 }
 
 /**
-  * @brief  follow mode angle update
-  * @param
-  * @retval void
-  */
+ * @brief  follow mode angle update
+ * @param
+ * @retval void
+ */
 int32_t follow_angle_info_rcv(uint8_t *buff, uint16_t len)
 {
     struct cmd_gimbal_info *info;
