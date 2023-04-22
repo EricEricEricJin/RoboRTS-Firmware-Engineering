@@ -39,6 +39,7 @@
 static uint8_t glb_sys_cfg;
 static uint8_t glb_driver_cfg;
 static uint8_t glb_pid_cfg;
+static uint8_t glb_speed_cfg;
 
 void system_config(void);
 void hw_init(void);
@@ -109,6 +110,7 @@ void system_config(void)
     glb_sys_cfg = HAL_GPIO_ReadPin(APP_CONFIG_GPIO_Port, APP_CONFIG_Pin);
     glb_driver_cfg = HAL_GPIO_ReadPin(DRIVER_CONFIG_GPIO_Port, DRIVER_CONFIG_Pin);
     glb_pid_cfg = HAL_GPIO_ReadPin(PID_CONFIG_GPIO_Port, PID_CONFIG_Pin);
+    glb_speed_cfg = HAL_GPIO_ReadPin(SPEED_CONFIG_GPIO_Port, SPEED_CONFIG_Pin);
 }
 
 void hw_init(void)
@@ -131,4 +133,9 @@ uint8_t get_driver_cfg(void)
 uint8_t get_pid_cfg(void)
 {
     return glb_pid_cfg;
+}
+
+uint8_t get_speed_cfg(void)
+{
+    return glb_speed_cfg;
 }

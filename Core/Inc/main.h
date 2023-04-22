@@ -104,6 +104,8 @@ void Error_Handler(void);
 #define APP_CONFIG_GPIO_Port GPIOB
 #define CS1_GYRO_Pin GPIO_PIN_0
 #define CS1_GYRO_GPIO_Port GPIOB
+#define SPEED_CONFIG_Pin GPIO_PIN_14
+#define SPEED_CONFIG_GPIO_Port GPIOB
 #define PID_CONFIG_Pin GPIO_PIN_15
 #define PID_CONFIG_GPIO_Port GPIOB
 

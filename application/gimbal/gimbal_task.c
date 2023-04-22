@@ -156,8 +156,9 @@ void gimbal_task(void const *argument)
         pitch_outer_param.p = 60.0f;
         pitch_outer_param.max_out = 2000;
 
-        pitch_inter_param.p = 100.0f;
-        pitch_inter_param.i = 0.1f;
+        pitch_inter_param.p = 80.0f;
+        pitch_inter_param.i = 0.01f;
+        // pitch_inter_param.d = 3.0f;
         pitch_inter_param.max_out = 30000;
         pitch_inter_param.integral_limit = 3000;
     }

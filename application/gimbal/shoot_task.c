@@ -24,6 +24,8 @@
 #include "event.h"
 #include "os_timer.h"
 
+#include "init.h"
+
 #include "tim.h"
 
 #include "log.h"
@@ -126,7 +128,11 @@ int32_t shoot_firction_toggle(shoot_t p_shoot)
     else
     {
         // shoot_set_fric_speed(p_shoot, 1250, 1250);
-        shoot_set_fric_speed(p_shoot, FIRC_MAX_SPEED, FIRC_MAX_SPEED);
+        if (get_speed_cfg() == NOJMP_SPEED)
+            shoot_set_fric_speed(p_shoot, FIRC_MAX_SPEED, FIRC_MAX_SPEED);
+        else 
+            shoot_set_fric_speed(p_shoot, FIRC_MAX_SPEED_PLUG, FIRC_MAX_SPEED_PLUG);
+
 
         // Turn on laser
         __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, 1999);

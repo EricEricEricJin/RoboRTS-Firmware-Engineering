@@ -21,15 +21,17 @@
 #define LOG_TAG "shoot"
 #include "log.h"
 
+#include "init.h"
+
 static int32_t shoot_fric_ctrl(struct shoot *shoot);
 static int32_t shoot_cmd_ctrl(struct shoot *shoot);
 static int32_t shoot_block_check(struct shoot *shoot);
 
 /**
-  * @brief     turn motor pid init
-  * @param[in]
-  * @retval    error code
-  */
+ * @brief     turn motor pid init
+ * @param[in]
+ * @retval    error code
+ */
 int32_t shoot_pid_init(struct shoot *shoot, const char *name, struct pid_param param, enum device_can can, uint16_t can_id)
 {
     char motor_name[OBJECT_NAME_MAX_LEN] = {0};
@@ -73,10 +75,10 @@ end:
 }
 
 /**
-  * @brief     set friction wheel speed
-  * @param[in]
-  * @retval    error code
-  */
+ * @brief     set friction wheel speed
+ * @param[in]
+ * @retval    error code
+ */
 int32_t shoot_set_fric_speed(struct shoot *shoot, uint16_t fric_spd1, uint16_t fric_spd2)
 {
     device_assert(shoot != NULL);
@@ -96,10 +98,10 @@ int32_t shoot_get_fric_speed(struct shoot *shoot, uint16_t *fric_spd1, uint16_t 
 }
 
 /**
-  * @brief     set shoot num
-  * @param[in]
-  * @retval    error code
-  */
+ * @brief     set shoot num
+ * @param[in]
+ * @retval    error code
+ */
 int32_t shoot_set_cmd(struct shoot *shoot, uint8_t cmd, uint32_t shoot_num)
 {
     device_assert(shoot != NULL);
@@ -131,10 +133,10 @@ int32_t shoot_pid_calculate(struct shoot *shoot)
 }
 
 /**
-  * @brief     update shoot status by interupt
-  * @param[in]
-  * @retval    error code
-  */
+ * @brief     update shoot status by interupt
+ * @param[in]
+ * @retval    error code
+ */
 int32_t shoot_state_update(struct shoot *shoot)
 {
     device_assert(shoot != NULL);
@@ -192,10 +194,10 @@ int32_t shoot_disable(struct shoot *shoot)
 }
 
 /**
-  * @brief     when motor current more than a value, change motor turn arround.
-  * @param[in]
-  * @retval    error code
-  */
+ * @brief     when motor current more than a value, change motor turn arround.
+ * @param[in]
+ * @retval    error code
+ */
 static int32_t shoot_block_check(struct shoot *shoot)
 {
     static uint8_t first_block_f = 0;
@@ -284,16 +286,24 @@ static int32_t shoot_cmd_ctrl(struct shoot *shoot)
 }
 
 /**
-  * @brief     friction wheel start slowly.
-  * @param[in]
-  * @retval    error code
-  */
+ * @brief     friction wheel start slowly.
+ * @param[in]
+ * @retval    error code
+ */
 static int32_t shoot_fric_ctrl(struct shoot *shoot)
 {
     device_assert(shoot != NULL);
 
-    VAL_LIMIT(shoot->target.fric_spd[0], FIRC_STOP_SPEED, FIRC_MAX_SPEED);
-    VAL_LIMIT(shoot->target.fric_spd[1], FIRC_STOP_SPEED, FIRC_MAX_SPEED);
+    if (get_speed_cfg() == NOJMP_SPEED)
+    {
+        VAL_LIMIT(shoot->target.fric_spd[0], FIRC_STOP_SPEED, FIRC_MAX_SPEED);
+        VAL_LIMIT(shoot->target.fric_spd[1], FIRC_STOP_SPEED, FIRC_MAX_SPEED);
+    }
+    else
+    {
+        VAL_LIMIT(shoot->target.fric_spd[0], FIRC_STOP_SPEED, FIRC_MAX_SPEED_PLUG);
+        VAL_LIMIT(shoot->target.fric_spd[1], FIRC_STOP_SPEED, FIRC_MAX_SPEED_PLUG);
+    }
 
     shoot_get_fric_speed(shoot, &(shoot->fric_spd[0]), &(shoot->fric_spd[1]));
 
