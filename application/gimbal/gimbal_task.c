@@ -332,7 +332,9 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
         gimbal_set_yaw_mode(p_gimbal, GYRO_MODE);
         if (get_driver_cfg() == NOJMP_DRIVER)
         {
-            pit_delta = -(float)p_info->ch4 * 0.0015f;
+            local_ch4 = p_info->ch4;
+            DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
+            pit_delta = -local_ch4 * 0.5f;
             yaw_delta = -(float)p_info->ch3 * 0.0015f;
         }
         else
@@ -354,7 +356,9 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
 
         if (get_driver_cfg() == NOJMP_DRIVER)
         {
-            pit_delta = -(float)p_info->ch4 * 0.0015f;
+            local_ch4 = p_info->ch4;
+            DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
+            pit_delta = -local_ch4 * 0.5f;
         }
         else
         {
