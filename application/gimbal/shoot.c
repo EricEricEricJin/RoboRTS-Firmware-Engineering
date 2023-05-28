@@ -307,6 +307,10 @@ static int32_t shoot_fric_ctrl(struct shoot *shoot)
 
     shoot_get_fric_speed(shoot, &(shoot->fric_spd[0]), &(shoot->fric_spd[1]));
 
+    // #define FRIC_SPEED_ADJ
+    
+    #ifndef FRIC_SPEED_ADJ
+
     if (shoot->target.fric_spd[0] != shoot->fric_spd[0])
     {
         if (shoot->target.fric_spd[0] < shoot->fric_spd[0])
@@ -329,6 +333,11 @@ static int32_t shoot_fric_ctrl(struct shoot *shoot)
             shoot->fric_spd[1] += 1;
         }
     }
+
+    #else
+        shoot->fric_spd[0] = shoot->target.fric_spd[0];
+        shoot->fric_spd[1] = shoot->target.fric_spd[1];
+    #endif
 
     fric_set_output(shoot->fric_spd[0], shoot->fric_spd[1]);
 
