@@ -311,7 +311,7 @@ int32_t gimbal_cascade_calculate(struct gimbal *gimbal)
         yaw_fdb = gimbal->sensor.gyro_angle.yaw;
         center_offset = gimbal->sensor.gyro_angle.yaw - gimbal->ecd_angle.yaw;
 
-        VAL_LIMIT(gimbal->gyro_target_angle.yaw, YAW_ANGLE_MIN + center_offset, YAW_ANGLE_MAX + center_offset);
+        // VAL_LIMIT(gimbal->gyro_target_angle.yaw, YAW_ANGLE_MIN + center_offset, YAW_ANGLE_MAX + center_offset);
 
         outer_out = pid_calculate(&(gimbal->yaw_outer_pid), yaw_fdb, gimbal->gyro_target_angle.yaw);
     }
