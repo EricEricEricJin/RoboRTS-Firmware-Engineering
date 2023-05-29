@@ -28,6 +28,7 @@
 #include "init.h"
 
 #include "appcfg.h"
+#include "log.h"
 
 struct pid_param chassis_motor_param =
     {
@@ -76,8 +77,9 @@ void chassis_task(void const *argument)
 
     float local_ch3;
 
-    uint8_t no_input_flag = 1;
+    uint8_t no_input_flag = 0;
     uint32_t no_input_t0 = 0;
+
     uint8_t spin_flag = 0;
     uint32_t align_t0 = 0;
 
@@ -89,6 +91,8 @@ void chassis_task(void const *argument)
         EventMsgGetLast(&nolistSubs, AHRS_MSG, &chassis_gyro, NULL);
 
         chassis_gyro_updata(&chassis, chassis_gyro.yaw * RAD_TO_DEG, chassis_gyro.gz * RAD_TO_DEG);
+
+        log_i("rel_angle: %d", (int)follow_relative_angle);
 
         if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK || rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
         {
@@ -105,13 +109,12 @@ void chassis_task(void const *argument)
                 vy = -local_ch3 * MAX_CHASSIS_VY_SPEED; // right y
             }
 
-            wz = pid_calculate(&pid_follow, follow_relative_angle, 0);
-            if (follow_relative_angle < 180)
-                wz = -wz;
+            wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
+            
 
-            if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK) {
+            if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
+            {
                 // Little-spin enabled
-
                 if (abs(vx) <= MAX_CHASSIS_VX_SPEED / 200.0 && abs(vy) <= MAX_CHASSIS_VY_SPEED / 200.0)
                 {
                     // No x-y input
@@ -121,7 +124,7 @@ void chassis_task(void const *argument)
                         no_input_t0 = get_time_ms();
                         no_input_flag = 1;
                     }
-                    else if (get_time_ms() - no_input_t0 > 300)
+                    if (no_input_flag == 1 && get_time_ms() - no_input_t0 > 300)
                     {
                         vx = vy = 0;
                         wz = SPIN_SPEED;
@@ -131,14 +134,15 @@ void chassis_task(void const *argument)
                 else
                 {
                     // Has input
-                    no_input_flag = 0;
-
-                    if (spin_flag == 1)
+                    if (no_input_flag == 1 && spin_flag == 1)
                     {
+                        // Prev has no input and is spinning
+                        no_input_flag = 0;
                         // Start align timing
                         align_t0 = get_time_ms();
                     }
-                    else if (spin_flag && get_time_ms() - align_t0 < (150000.0 / SPIN_SPEED) && follow_relative_angle > 5)
+                    // if (spin_flag == 1)
+                    if (spin_flag == 1 && get_time_ms() - align_t0 < (300000.0 / SPIN_SPEED) && abs(follow_relative_angle) > 5)
                     {
                         // is spinning AND NOT timeout AND NOT aligned
                         vx = vy = 0;
