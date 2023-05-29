@@ -75,6 +75,12 @@ void chassis_task(void const *argument)
     pid_struct_init(&pid_follow, MAX_CHASSIS_VW_SPEED, 50, 8.0f, 0.0f, 2.0f);
 
     float local_ch3;
+
+    uint8_t no_input_flag = 1;
+    uint32_t no_input_t0 = 0;
+    uint8_t spin_flag = 0;
+    uint32_t align_t0 = 0;
+
     while (1)
     {
         /* dr16 data update */
@@ -99,18 +105,46 @@ void chassis_task(void const *argument)
                 vy = -local_ch3 * MAX_CHASSIS_VY_SPEED; // right y
             }
 
-            wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
+            wz = pid_calculate(&pid_follow, follow_relative_angle, 0);
+            if (follow_relative_angle < 180)
+                wz = -wz;
 
             if (abs(vx) <= MAX_CHASSIS_VX_SPEED / 200.0 && abs(vy) <= MAX_CHASSIS_VY_SPEED / 200.0)
             {
                 // No input
-                vx = vy = 0;
-                wz = SPIN_SPEED;
+
+                if (no_input_flag == 0)
+                {
+                    // Prev has input AND currently NO input
+                    no_input_t0 = get_time_ms();
+                    no_input_flag = 1;
+                }
+                else if (get_time_ms() - no_input_t0 > 300)
+                {
+                    vx = vy = 0;
+                    wz = SPIN_SPEED;
+                    spin_flag = 1;
+                }
             }
-            else if (follow_relative_angle > 2.0)
+            else
             {
-                // Align chassis with gimbal
-                vx = vy = 0;
+                // Has input
+                no_input_flag = 0;
+
+                if (spin_flag == 1)
+                {
+                    // Start align timing
+                    align_t0 = get_time_ms();
+                }
+                else if (spin_flag && get_time_ms() - align_t0 < (150000.0 / SPIN_SPEED) && follow_relative_angle > 5)
+                {
+                    // is spinning AND NOT timeout AND NOT aligned
+                    vx = vy = 0;
+                }
+                else
+                {
+                    spin_flag = 0;
+                }
             }
 
             chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
