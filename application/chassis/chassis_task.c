@@ -90,7 +90,7 @@ void chassis_task(void const *argument)
 
         chassis_gyro_updata(&chassis, chassis_gyro.yaw * RAD_TO_DEG, chassis_gyro.gz * RAD_TO_DEG);
 
-        if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
+        if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK || rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
         {
             if (get_driver_cfg() == NOJMP_DRIVER)
             {
@@ -109,41 +109,44 @@ void chassis_task(void const *argument)
             if (follow_relative_angle < 180)
                 wz = -wz;
 
-            if (abs(vx) <= MAX_CHASSIS_VX_SPEED / 200.0 && abs(vy) <= MAX_CHASSIS_VY_SPEED / 200.0)
-            {
-                // No input
+            if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK) {
+                // Little-spin enabled
 
-                if (no_input_flag == 0)
+                if (abs(vx) <= MAX_CHASSIS_VX_SPEED / 200.0 && abs(vy) <= MAX_CHASSIS_VY_SPEED / 200.0)
                 {
-                    // Prev has input AND currently NO input
-                    no_input_t0 = get_time_ms();
-                    no_input_flag = 1;
-                }
-                else if (get_time_ms() - no_input_t0 > 300)
-                {
-                    vx = vy = 0;
-                    wz = SPIN_SPEED;
-                    spin_flag = 1;
-                }
-            }
-            else
-            {
-                // Has input
-                no_input_flag = 0;
-
-                if (spin_flag == 1)
-                {
-                    // Start align timing
-                    align_t0 = get_time_ms();
-                }
-                else if (spin_flag && get_time_ms() - align_t0 < (150000.0 / SPIN_SPEED) && follow_relative_angle > 5)
-                {
-                    // is spinning AND NOT timeout AND NOT aligned
-                    vx = vy = 0;
+                    // No x-y input
+                    if (no_input_flag == 0)
+                    {
+                        // Prev has input AND currently NO input
+                        no_input_t0 = get_time_ms();
+                        no_input_flag = 1;
+                    }
+                    else if (get_time_ms() - no_input_t0 > 300)
+                    {
+                        vx = vy = 0;
+                        wz = SPIN_SPEED;
+                        spin_flag = 1;
+                    }
                 }
                 else
                 {
-                    spin_flag = 0;
+                    // Has input
+                    no_input_flag = 0;
+
+                    if (spin_flag == 1)
+                    {
+                        // Start align timing
+                        align_t0 = get_time_ms();
+                    }
+                    else if (spin_flag && get_time_ms() - align_t0 < (150000.0 / SPIN_SPEED) && follow_relative_angle > 5)
+                    {
+                        // is spinning AND NOT timeout AND NOT aligned
+                        vx = vy = 0;
+                    }
+                    else
+                    {
+                        spin_flag = 0;
+                    }
                 }
             }
 
@@ -152,27 +155,36 @@ void chassis_task(void const *argument)
             chassis_set_speed(&chassis, vx, vy, wz);
         }
 
-        if (rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
-        {
-            if (get_driver_cfg() == NOJMP_DRIVER)
-            {
-                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-                vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
-                wz = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VW_SPEED;
-            }
-            else
-            {
-                local_ch3 = p_rc_info->ch3;
-                DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
-                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-                vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;
-                wz = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VW_SPEED;
-            }
+        // if (rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
+        // {
+        //     if (get_driver_cfg() == NOJMP_DRIVER)
+        //     {
+        //         vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+        //         vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
+        //         wz = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VW_SPEED;
+        //     }
+        //     else
+        //     {
+        //         local_ch3 = p_rc_info->ch3;
+        //         DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
+        //         vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+        //         vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;
+        //         wz = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VW_SPEED;
+        //     }
 
-            chassis_set_offset(&chassis, 0, 0);
-            chassis_set_acc(&chassis, 0, 0, 0);
-            chassis_set_speed(&chassis, vx, vy, wz);
-        }
+        //     if (spin_flag)
+        //     {
+        //         if (follow_relative_angle < 5)
+        //             spin_flag = 0;
+        //         wz = pid_calculate(&pid_follow, follow_relative_angle, 0);
+        //         if (follow_relative_angle < 180)
+        //             wz = -wz;
+        //     }
+
+        //     chassis_set_offset(&chassis, 0, 0);
+        //     chassis_set_acc(&chassis, 0, 0, 0);
+        //     chassis_set_speed(&chassis, vx, vy, wz);
+        // }
 
         if (rc_device_get_state(&chassis_rc, RC_S2_MID2DOWN) == E_OK)
         {

@@ -328,7 +328,7 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
     p_info->ch4 = -p_info->ch4;
 #endif
     /* follow mode */
-    if (rc_device_get_state(p_rc, RC_S2_UP) == E_OK)
+    if (rc_device_get_state(p_rc, RC_S2_UP) == E_OK || rc_device_get_state(p_rc, RC_S2_MID) == E_OK)
     {
         gimbal_set_yaw_mode(p_gimbal, GYRO_MODE);
         if (get_driver_cfg() == NOJMP_DRIVER)
@@ -350,36 +350,36 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
         gimbal_set_yaw_delta(p_gimbal, yaw_delta);
     }
 
-    /* encoder mode */
-    if (rc_device_get_state(p_rc, RC_S2_MID) == E_OK)
-    {
-        gimbal_set_yaw_mode(p_gimbal, ENCODER_MODE);
+    // /* encoder mode */
+    // if (rc_device_get_state(p_rc, RC_S2_MID) == E_OK)
+    // {
+    //     gimbal_set_yaw_mode(p_gimbal, ENCODER_MODE);
 
-        if (get_driver_cfg() == NOJMP_DRIVER)
-        {
-            local_ch4 = p_info->ch4;
-            DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
-            pit_delta = -local_ch4 * 0.5f;
-        }
-        else
-        {
-            local_ch4 = p_info->ch4;
-            DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
-            pit_delta = local_ch4 * 0.5f; // left y
-        }
+    //     if (get_driver_cfg() == NOJMP_DRIVER)
+    //     {
+    //         local_ch4 = p_info->ch4;
+    //         DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
+    //         pit_delta = -local_ch4 * 0.5f;
+    //     }
+    //     else
+    //     {
+    //         local_ch4 = p_info->ch4;
+    //         DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
+    //         pit_delta = local_ch4 * 0.5f; // left y
+    //     }
 
-        gimbal_set_pitch_delta(p_gimbal, pit_delta);
+    //     gimbal_set_pitch_delta(p_gimbal, pit_delta);
 
-        if (rc_device_get_state(p_rc, RC_S2_UP2MID) == E_OK)
-        {
-            gimbal_set_yaw_angle(p_gimbal, 0, 0);
-        }
-    }
+    //     if (rc_device_get_state(p_rc, RC_S2_UP2MID) == E_OK)
+    //     {
+    //         gimbal_set_yaw_angle(p_gimbal, 0, 0);
+    //     }
+    // }
 
-    if (rc_device_get_state(p_rc, RC_S2_DOWN2MID) == E_OK)
-    {
-        gimbal_set_yaw_angle(p_gimbal, 0, 0);
-    }
+    // if (rc_device_get_state(p_rc, RC_S2_DOWN2MID) == E_OK)
+    // {
+    //     gimbal_set_yaw_angle(p_gimbal, 0, 0);
+    // }
 
     if (rc_device_get_state(p_rc, RC_S2_DOWN) == E_OK)
     {
