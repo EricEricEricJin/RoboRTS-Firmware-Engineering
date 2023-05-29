@@ -27,6 +27,8 @@
 #include "offline_service.h"
 #include "init.h"
 
+#include "appcfg.h"
+
 struct pid_param chassis_motor_param =
     {
         .p = 6.5f,
@@ -34,8 +36,6 @@ struct pid_param chassis_motor_param =
         .max_out = 15000,
         .integral_limit = 500,
 };
-
-#define Y_MOVE_DZ 0
 
 static void chassis_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp);
 static int32_t chassis_angle_broadcast(void *argv);
@@ -100,6 +100,19 @@ void chassis_task(void const *argument)
             }
 
             wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
+
+            if (abs(vx) <= MAX_CHASSIS_VX_SPEED / 200.0 && abs(vy) <= MAX_CHASSIS_VY_SPEED / 200.0)
+            {
+                // No input
+                vx = vy = 0;
+                wz = SPIN_SPEED;
+            }
+            else if (follow_relative_angle > 2.0)
+            {
+                // Align chassis with gimbal
+                vx = vy = 0;
+            }
+
             chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
             chassis_set_acc(&chassis, 0, 0, 0);
             chassis_set_speed(&chassis, vx, vy, wz);
