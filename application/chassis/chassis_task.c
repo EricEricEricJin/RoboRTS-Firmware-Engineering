@@ -52,6 +52,16 @@ static float vx, vy, wz;
 struct pid pid_follow = {0};
 float follow_relative_angle;
 
+/* Inverse matrix */
+void mat_inverse(double x[2][2], double y[2][2])
+{
+    double delta = x[0][0] * x[1][1] - x[0][1] * x[1][0];
+    y[0][0] = x[1][1] / delta;
+    y[0][1] = -x[0][1] / delta;
+    y[1][0] = -x[1][0] / delta;
+    y[1][1] = x[0][0] / delta;
+}
+
 void chassis_task(void const *argument)
 {
     rc_info_t p_rc_info;
@@ -77,11 +87,9 @@ void chassis_task(void const *argument)
 
     float local_ch3;
 
-    uint8_t no_input_flag = 0;
-    uint32_t no_input_t0 = 0;
-
-    uint8_t spin_flag = 0;
-    uint32_t align_t0 = 0;
+    double rotate_mat[2][2];
+    double inv_rotate_mat[2][2];
+    float vx_temp, vy_temp;
 
     while (1)
     {
@@ -109,86 +117,30 @@ void chassis_task(void const *argument)
                 vy = -local_ch3 * MAX_CHASSIS_VY_SPEED; // right y
             }
 
-            wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
-            
-
             if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
             {
-                // Little-spin enabled
-                if (abs(vx) <= MAX_CHASSIS_VX_SPEED / 200.0 && abs(vy) <= MAX_CHASSIS_VY_SPEED / 200.0)
-                {
-                    // No x-y input
-                    if (no_input_flag == 0)
-                    {
-                        // Prev has input AND currently NO input
-                        no_input_t0 = get_time_ms();
-                        no_input_flag = 1;
-                    }
-                    if (no_input_flag == 1 && get_time_ms() - no_input_t0 > 300)
-                    {
-                        vx = vy = 0;
-                        wz = SPIN_SPEED;
-                        spin_flag = 1;
-                    }
-                }
-                else
-                {
-                    // Has input
-                    if (no_input_flag == 1 && spin_flag == 1)
-                    {
-                        // Prev has no input and is spinning
-                        no_input_flag = 0;
-                        // Start align timing
-                        align_t0 = get_time_ms();
-                    }
-                    // if (spin_flag == 1)
-                    if (spin_flag == 1 && get_time_ms() - align_t0 < (300000.0 / SPIN_SPEED) && abs(follow_relative_angle) > 5)
-                    {
-                        // is spinning AND NOT timeout AND NOT aligned
-                        vx = vy = 0;
-                    }
-                    else
-                    {
-                        spin_flag = 0;
-                    }
-                }
+                wz = SPIN_SPEED;
+                rotate_mat[0][0] = cos((double)follow_relative_angle / RAD_TO_DEG);
+                rotate_mat[0][1] = -sin((double)follow_relative_angle / RAD_TO_DEG);
+                rotate_mat[1][0] = sin((double)follow_relative_angle / RAD_TO_DEG);
+                rotate_mat[1][1] = cos((double)follow_relative_angle / RAD_TO_DEG);
+
+                mat_inverse(rotate_mat, inv_rotate_mat);
+                vx_temp = inv_rotate_mat[0][0] * vx + inv_rotate_mat[0][1] * (-vy);
+                vy_temp = inv_rotate_mat[1][0] * vx + inv_rotate_mat[1][1] * (-vy);
+
+                vx = vx_temp;
+                vy = -vy_temp;
+            }
+            else
+            {
+                wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
             }
 
             chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
             chassis_set_acc(&chassis, 0, 0, 0);
             chassis_set_speed(&chassis, vx, vy, wz);
         }
-
-        // if (rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
-        // {
-        //     if (get_driver_cfg() == NOJMP_DRIVER)
-        //     {
-        //         vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-        //         vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
-        //         wz = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VW_SPEED;
-        //     }
-        //     else
-        //     {
-        //         local_ch3 = p_rc_info->ch3;
-        //         DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
-        //         vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-        //         vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;
-        //         wz = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VW_SPEED;
-        //     }
-
-        //     if (spin_flag)
-        //     {
-        //         if (follow_relative_angle < 5)
-        //             spin_flag = 0;
-        //         wz = pid_calculate(&pid_follow, follow_relative_angle, 0);
-        //         if (follow_relative_angle < 180)
-        //             wz = -wz;
-        //     }
-
-        //     chassis_set_offset(&chassis, 0, 0);
-        //     chassis_set_acc(&chassis, 0, 0, 0);
-        //     chassis_set_speed(&chassis, vx, vy, wz);
-        // }
 
         if (rc_device_get_state(&chassis_rc, RC_S2_MID2DOWN) == E_OK)
         {
