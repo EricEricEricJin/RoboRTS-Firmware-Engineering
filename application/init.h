@@ -18,8 +18,8 @@
 #ifndef __INIT_H__
 #define __INIT_H__
 
-#define CHASSIS_APP 1
-#define GIMBAL_APP 0
+// #define CHASSIS_APP 1
+// #define GIMBAL_APP 0
 
 #define JMP_DRIVER 0
 #define NOJMP_DRIVER 1

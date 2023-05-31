@@ -22,14 +22,14 @@
 #include "init.h"
 #include "motor.h"
 #include "os_timer.h"
-#include "infantry_cmd.h"
+#include "engineering_cmd.h"
 #include "protocol.h"
 #include "event_mgr.h"
 #include "event.h"
 #include "referee_system.h"
 #include "shell.h"
 
-#include "infantry_cmd.h"
+#include "engineering_cmd.h"
 #include "app_manage.h"
 
 #include "log.h"
@@ -91,11 +91,11 @@ int32_t dr16_rx_data_by_can(uint8_t *buff, uint16_t len)
     return 0;
 }
 
-int32_t dr16_forward_by_can(uint8_t *buff, uint16_t len)
-{
-    protocol_send(PROTOCOL_BROADCAST_ADDR, CMD_RC_DATA_FORWORD, buff, len);
-    return 0;
-}
+// int32_t dr16_forward_by_can(uint8_t *buff, uint16_t len)
+// {
+//     protocol_send(PROTOCOL_BROADCAST_ADDR, CMD_RC_DATA_FORWORD, buff, len);
+//     return 0;
+// }
 
 /**
   * @brief  usb vcp interupt
@@ -225,7 +225,8 @@ void board_config(void)
     soft_timer_register(motor_can_output_1ms, NULL, 1);
 
     /* dbus callback init */
-    dr16_uart_init(dr16_rx_data_by_uart, dr16_forward_by_can);
+    // dr16_uart_init(dr16_rx_data_by_uart, dr16_forward_by_can);
+    dr16_uart_init(dr16_rx_data_by_uart, NULL);
     /* dbus data cmd register */
     protocol_rcv_cmd_register(CMD_RC_DATA_FORWORD, dr16_rx_data_by_can);
 

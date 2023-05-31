@@ -17,7 +17,7 @@
 #ifndef __CHASSIS_CMD_H__
 #define __CHASSIS_CMD_H__
 
-#include "infantry_cmd.h"
+#include "engineering_cmd.h"
 
 #define CHASSIS_SDK_ON  1
 #define CHASSIS_SDK_OFF 0

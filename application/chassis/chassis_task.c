@@ -19,7 +19,7 @@
 #include "chassis_task.h"
 #include "chassis_cmd.h"
 #include "os_timer.h"
-#include "infantry_cmd.h"
+#include "engineering_cmd.h"
 #include "board.h"
 #include "event_mgr.h"
 #include "event.h"
@@ -38,7 +38,7 @@ struct pid_param chassis_motor_param =
 #define Y_MOVE_DZ 0
 
 static void chassis_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp);
-static int32_t chassis_angle_broadcast(void *argv);
+// static int32_t chassis_angle_broadcast(void *argv);
 
 struct chassis chassis;
 struct rc_device chassis_rc;
@@ -70,7 +70,7 @@ void chassis_task(void const *argument)
     chassis_pid_init(&chassis, "Chassis", chassis_motor_param, DEVICE_CAN2);
 
     soft_timer_register((soft_timer_callback)chassis_pid_calculate, (void *)&chassis, 5);
-    soft_timer_register((soft_timer_callback)chassis_angle_broadcast, (void *)NULL, 10);
+    // soft_timer_register((soft_timer_callback)chassis_angle_broadcast, (void *)NULL, 10);
 
     pid_struct_init(&pid_follow, MAX_CHASSIS_VW_SPEED, 50, 8.0f, 0.0f, 2.0f);
 
@@ -178,26 +178,26 @@ void chassis_task(void const *argument)
  * @param
  * @retval void
  */
-int32_t chassis_angle_broadcast(void *argv)
-{
-    int32_t s_yaw, s_yaw_rate;
+// int32_t chassis_angle_broadcast(void *argv)
+// {
+//     int32_t s_yaw, s_yaw_rate;
 
-    s_yaw = chassis.mecanum.gyro.yaw_gyro_angle * 1000;
-    s_yaw_rate = chassis.mecanum.gyro.yaw_gyro_rate * 1000;
+//     s_yaw = chassis.mecanum.gyro.yaw_gyro_angle * 1000;
+//     s_yaw_rate = chassis.mecanum.gyro.yaw_gyro_rate * 1000;
 
-    uint8_t data[8];
-    data[0] = s_yaw >> 24;
-    data[1] = s_yaw >> 16;
-    data[2] = s_yaw >> 8;
-    data[3] = s_yaw;
-    data[4] = s_yaw_rate >> 24;
-    data[5] = s_yaw_rate >> 16;
-    data[6] = s_yaw_rate >> 8;
-    data[7] = s_yaw_rate;
+//     uint8_t data[8];
+//     data[0] = s_yaw >> 24;
+//     data[1] = s_yaw >> 16;
+//     data[2] = s_yaw >> 8;
+//     data[3] = s_yaw;
+//     data[4] = s_yaw_rate >> 24;
+//     data[5] = s_yaw_rate >> 16;
+//     data[6] = s_yaw_rate >> 8;
+//     data[7] = s_yaw_rate;
 
-    can1_std_transmit(0x401, data, 8);
-    return 0;
-}
+//     can1_std_transmit(0x401, data, 8);
+//     return 0;
+// }
 
 struct chassis *get_chassis(void)
 {
@@ -219,14 +219,14 @@ static void chassis_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t 
  * @param
  * @retval void
  */
-int32_t follow_angle_info_rcv(uint8_t *buff, uint16_t len)
-{
-    struct cmd_gimbal_info *info;
-    info = (struct cmd_gimbal_info *)buff;
-    follow_relative_angle = info->yaw_ecd_angle / 10.0f;
-    offline_event_time_update(OFFLINE_GIMBAL_INFO);
-    return 0;
-}
+// int32_t follow_angle_info_rcv(uint8_t *buff, uint16_t len)
+// {
+//     struct cmd_gimbal_info *info;
+//     info = (struct cmd_gimbal_info *)buff;
+//     follow_relative_angle = info->yaw_ecd_angle / 10.0f;
+//     offline_event_time_update(OFFLINE_GIMBAL_INFO);
+//     return 0;
+// }
 
 void set_follow_relative(float val)
 {

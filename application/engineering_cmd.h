@@ -29,10 +29,10 @@
 
 #define MANIFOLD2_ADDRESS      0x00
 #define CHASSIS_ADDRESS        0x01
-#define GIMBAL_ADDRESS         0x02
+// #define GIMBAL_ADDRESS         0x02
 
-#define GIMBAL_CAN_ID         0x500
-#define CHASSIS_CAN_ID        0x600
+// #define GIMBAL_CAN_ID         0x500
+// #define CHASSIS_CAN_ID        0x600
 
 /* cmd id can not be set 0xffff */
 #pragma pack(push,1)
@@ -90,36 +90,36 @@ struct cmd_chassis_spd_acc
     int16_t rotate_y_offset;
 };
 
-#define CMD_PUSH_GIMBAL_INFO                (0x0301u)
-struct cmd_gimbal_info
-{
-    uint8_t   mode;
-    /* unit: degree */
-    int16_t pitch_ecd_angle;
-    int16_t yaw_ecd_angle;
-    int16_t pitch_gyro_angle;
-    int16_t yaw_gyro_angle;
-    /* uint: degree/s */
-    int16_t yaw_rate;
-    int16_t pitch_rate;
-};
+// #define CMD_PUSH_GIMBAL_INFO                (0x0301u)
+// struct cmd_gimbal_info
+// {
+//     uint8_t   mode;
+//     /* unit: degree */
+//     int16_t pitch_ecd_angle;
+//     int16_t yaw_ecd_angle;
+//     int16_t pitch_gyro_angle;
+//     int16_t yaw_gyro_angle;
+//     /* uint: degree/s */
+//     int16_t yaw_rate;
+//     int16_t pitch_rate;
+// };
 
-#define CMD_SET_GIMBAL_MODE                 (0x0302u)
-#define CMD_SET_GIMBAL_ANGLE                (0x0303u)
-struct cmd_gimbal_angle
-{
-    union
-    {
-        uint8_t flag;
-        struct
-        {
-            uint8_t yaw_mode: 1; // 0 code angle
-            uint8_t pitch_mode: 1;
-        } bit;
-    } ctrl;
-    int16_t pitch;
-    int16_t yaw;
-};
+// #define CMD_SET_GIMBAL_MODE                 (0x0302u)
+// #define CMD_SET_GIMBAL_ANGLE                (0x0303u)
+// struct cmd_gimbal_angle
+// {
+//     union
+//     {
+//         uint8_t flag;
+//         struct
+//         {
+//             uint8_t yaw_mode: 1; // 0 code angle
+//             uint8_t pitch_mode: 1;
+//         } bit;
+//     } ctrl;
+//     int16_t pitch;
+//     int16_t yaw;
+// };
 
 #define CMD_SET_FRICTION_SPEED              (0x0304u)
 struct cmd_firction_speed
@@ -128,17 +128,17 @@ struct cmd_firction_speed
     uint16_t right;
 };
 
-#define CMD_SET_SHOOT_FREQUENTCY            (0x0305u)
-struct cmd_shoot_num
-{
-    uint8_t  shoot_cmd;
-    uint32_t shoot_add_num;
-    uint16_t shoot_freq;
-};
+// #define CMD_SET_SHOOT_FREQUENTCY            (0x0305u)
+// struct cmd_shoot_num
+// {
+//     uint8_t  shoot_cmd;
+//     uint32_t shoot_add_num;
+//     uint16_t shoot_freq;
+// };
 
 #define CMD_RC_DATA_FORWORD                 (0x0401u)
 #define CMD_PUSH_UWB_INFO                   (0x0402u)
-#define CMD_GIMBAL_ADJUST                   (0x0403u)
+// #define CMD_GIMBAL_ADJUST                   (0x0403u)
 
 #pragma pack(pop)
 

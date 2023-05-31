@@ -18,7 +18,7 @@
 #include "protocol.h"
 #include "chassis_cmd.h"
 #include "chassis_task.h"
-#include "infantry_cmd.h"
+#include "engineering_cmd.h"
 #include "referee_system.h"
 #include "offline_service.h"
 

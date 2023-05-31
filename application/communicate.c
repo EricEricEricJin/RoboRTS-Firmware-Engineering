@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 #include "cmsis_os.h"
-#include "infantry_cmd.h"
+#include "engineering_cmd.h"
 #include "referee_system.h"
 #include "protocol.h"
 

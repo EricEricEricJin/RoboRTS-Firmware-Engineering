@@ -98,12 +98,6 @@ application/chassis/chassis_app.c \
 application/chassis/chassis_cmd.c \
 application/chassis/chassis_task.c \
 application/communicate.c \
-application/gimbal/gimbal.c \
-application/gimbal/gimbal_app.c \
-application/gimbal/gimbal_cmd.c \
-application/gimbal/gimbal_task.c \
-application/gimbal/shoot.c \
-application/gimbal/shoot_task.c \
 application/init.c \
 application/offline_service.c \
 application/sensor_task.c \
@@ -242,7 +236,6 @@ C_INCLUDES =  \
 -IUSB_DEVICE/Target \
 -Iapplication \
 -Iapplication/chassis \
--Iapplication/gimbal \
 -Iboards \
 -Icomponents/algorithm \
 -Icomponents/bmi088 \
