@@ -27,9 +27,6 @@
 #include "offline_service.h"
 #include "init.h"
 
-#include "appcfg.h"
-#include "log.h"
-
 struct pid_param chassis_motor_param =
     {
         .p = 6.5f,
@@ -37,6 +34,8 @@ struct pid_param chassis_motor_param =
         .max_out = 15000,
         .integral_limit = 500,
 };
+
+#define Y_MOVE_DZ 0
 
 static void chassis_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp);
 static int32_t chassis_angle_broadcast(void *argv);
@@ -51,16 +50,6 @@ static float vx, vy, wz;
 /* fllow control */
 struct pid pid_follow = {0};
 float follow_relative_angle;
-
-/* Inverse matrix */
-void mat_inverse(double x[2][2], double y[2][2])
-{
-    double delta = x[0][0] * x[1][1] - x[0][1] * x[1][0];
-    y[0][0] = x[1][1] / delta;
-    y[0][1] = -x[0][1] / delta;
-    y[1][0] = -x[1][0] / delta;
-    y[1][1] = x[0][0] / delta;
-}
 
 void chassis_task(void const *argument)
 {
@@ -86,11 +75,6 @@ void chassis_task(void const *argument)
     pid_struct_init(&pid_follow, MAX_CHASSIS_VW_SPEED, 50, 8.0f, 0.0f, 2.0f);
 
     float local_ch3;
-
-    double rotate_mat[2][2];
-    double inv_rotate_mat[2][2];
-    float vx_temp, vy_temp;
-
     while (1)
     {
         /* dr16 data update */
@@ -100,9 +84,7 @@ void chassis_task(void const *argument)
 
         chassis_gyro_updata(&chassis, chassis_gyro.yaw * RAD_TO_DEG, chassis_gyro.gz * RAD_TO_DEG);
 
-        log_i("rel_angle: %d", (int)follow_relative_angle);
-
-        if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK || rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
+        if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
         {
             if (get_driver_cfg() == NOJMP_DRIVER)
             {
@@ -117,27 +99,30 @@ void chassis_task(void const *argument)
                 vy = -local_ch3 * MAX_CHASSIS_VY_SPEED; // right y
             }
 
-            if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
+            wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
+            chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
+            chassis_set_acc(&chassis, 0, 0, 0);
+            chassis_set_speed(&chassis, vx, vy, wz);
+        }
+
+        if (rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
+        {
+            if (get_driver_cfg() == NOJMP_DRIVER)
             {
-                wz = SPIN_SPEED;
-                rotate_mat[0][0] = cos((double)follow_relative_angle / RAD_TO_DEG);
-                rotate_mat[0][1] = -sin((double)follow_relative_angle / RAD_TO_DEG);
-                rotate_mat[1][0] = sin((double)follow_relative_angle / RAD_TO_DEG);
-                rotate_mat[1][1] = cos((double)follow_relative_angle / RAD_TO_DEG);
-
-                mat_inverse(rotate_mat, inv_rotate_mat);
-                vx_temp = inv_rotate_mat[0][0] * vx + inv_rotate_mat[0][1] * (-vy);
-                vy_temp = inv_rotate_mat[1][0] * vx + inv_rotate_mat[1][1] * (-vy);
-
-                vx = vx_temp;
-                vy = -vy_temp;
+                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+                vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
+                wz = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VW_SPEED;
             }
             else
             {
-                wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
+                local_ch3 = p_rc_info->ch3;
+                DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
+                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+                vy = -local_ch3 * MAX_CHASSIS_VY_SPEED;
+                wz = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VW_SPEED;
             }
 
-            chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
+            chassis_set_offset(&chassis, 0, 0);
             chassis_set_acc(&chassis, 0, 0, 0);
             chassis_set_speed(&chassis, vx, vy, wz);
         }
