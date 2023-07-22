@@ -31,7 +31,6 @@
 
 uint8_t get_driver_cfg(void);
 uint8_t get_pid_cfg(void);
-uint8_t get_speed_cfg(void);
 void hw_init(void);
 void task_init(void);
 
