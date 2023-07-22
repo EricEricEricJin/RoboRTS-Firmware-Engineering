@@ -49,7 +49,6 @@ static float vx, vy, wz;
 
 /* fllow control */
 struct pid pid_follow = {0};
-float follow_relative_angle;
 
 void chassis_task(void const *argument)
 {
@@ -83,27 +82,6 @@ void chassis_task(void const *argument)
         EventMsgGetLast(&nolistSubs, AHRS_MSG, &chassis_gyro, NULL);
 
         chassis_gyro_updata(&chassis, chassis_gyro.yaw * RAD_TO_DEG, chassis_gyro.gz * RAD_TO_DEG);
-
-        if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
-        {
-            if (get_driver_cfg() == NOJMP_DRIVER)
-            {
-                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-                vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
-            }
-            else
-            {
-                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED; // left x
-                local_ch3 = p_rc_info->ch3;
-                DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
-                vy = -local_ch3 * MAX_CHASSIS_VY_SPEED; // right y
-            }
-
-            wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
-            chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
-            chassis_set_acc(&chassis, 0, 0, 0);
-            chassis_set_speed(&chassis, vx, vy, wz);
-        }
 
         if (rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
         {
@@ -173,32 +151,6 @@ void chassis_task(void const *argument)
     }
 }
 
-/**
- * @brief  send chassis angle to gimbal
- * @param
- * @retval void
- */
-// int32_t chassis_angle_broadcast(void *argv)
-// {
-//     int32_t s_yaw, s_yaw_rate;
-
-//     s_yaw = chassis.mecanum.gyro.yaw_gyro_angle * 1000;
-//     s_yaw_rate = chassis.mecanum.gyro.yaw_gyro_rate * 1000;
-
-//     uint8_t data[8];
-//     data[0] = s_yaw >> 24;
-//     data[1] = s_yaw >> 16;
-//     data[2] = s_yaw >> 8;
-//     data[3] = s_yaw;
-//     data[4] = s_yaw_rate >> 24;
-//     data[5] = s_yaw_rate >> 16;
-//     data[6] = s_yaw_rate >> 8;
-//     data[7] = s_yaw_rate;
-
-//     can1_std_transmit(0x401, data, 8);
-//     return 0;
-// }
-
 struct chassis *get_chassis(void)
 {
     return &chassis;
@@ -212,23 +164,4 @@ struct chassis *get_chassis(void)
 static void chassis_dr16_data_update(uint32_t eventID, void *pMsgData, uint32_t timeStamp)
 {
     rc_device_date_update(&chassis_rc, pMsgData);
-}
-
-/**
- * @brief  follow mode angle update
- * @param
- * @retval void
- */
-// int32_t follow_angle_info_rcv(uint8_t *buff, uint16_t len)
-// {
-//     struct cmd_gimbal_info *info;
-//     info = (struct cmd_gimbal_info *)buff;
-//     follow_relative_angle = info->yaw_ecd_angle / 10.0f;
-//     offline_event_time_update(OFFLINE_GIMBAL_INFO);
-//     return 0;
-// }
-
-void set_follow_relative(float val)
-{
-    follow_relative_angle = val;
 }

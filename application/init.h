@@ -18,9 +18,6 @@
 #ifndef __INIT_H__
 #define __INIT_H__
 
-// #define CHASSIS_APP 1
-// #define GIMBAL_APP 0
-
 #define JMP_DRIVER 0
 #define NOJMP_DRIVER 1
 
@@ -32,7 +29,6 @@
 
 #include "os_timer.h"
 
-uint8_t get_sys_cfg(void);
 uint8_t get_driver_cfg(void);
 uint8_t get_pid_cfg(void);
 uint8_t get_speed_cfg(void);

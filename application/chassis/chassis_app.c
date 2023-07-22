@@ -38,9 +38,6 @@ void chassis_heart_online(void);
 void chassis_control_online(void);
 void chassis_control_offline(void);
 
-// void gimbal_info_offline(void);
-// void gimbal_info_online(void);
-
 void referee_data_send2pc(uint16_t cmd_id, uint8_t *pdata, uint16_t len);
 
 /* no send cmd need ack */
@@ -50,7 +47,6 @@ struct protocol_recv_cmd_obj chassis_recv_cmd_table[] =
 {
     /* CMD | callback function */
     {CMD_STUDENT_DATA, student_data_transmit},
-    // {CMD_PUSH_GIMBAL_INFO, follow_angle_info_rcv},
     {CMD_SET_CHASSIS_SPEED, chassis_speed_ctrl},
     {CMD_SET_CHASSIS_SPD_ACC, chassis_spd_acc_ctrl},
     {CMD_MANIFOLD2_HEART, chassis_manifold_heart},
@@ -69,15 +65,12 @@ struct offline_obj chassis_offline_table[] =
     {OFFLINE_CHASSIS_MOTOR4, ENABLE, OFFLINE_ERROR_LEVEL, 4, 100, NULL, NULL, NULL, NULL},
     {OFFLINE_MANIFOLD2_HEART, DISABLE, OFFLINE_WARNING_LEVEL, BEEP_DISABLE, 700, NULL, chassis_heart_offline, NULL, chassis_heart_online},
     {OFFLINE_CONTROL_CMD, ENABLE, OFFLINE_WARNING_LEVEL, BEEP_DISABLE, 700, NULL, chassis_control_offline, NULL, chassis_control_online},
-
-    // {OFFLINE_GIMBAL_INFO, ENABLE, APP_PROTECT_LEVEL, 0, 700, NULL, gimbal_info_offline, NULL, gimbal_info_online},
 };
 
-// struct route_obj chassis_route_table[] =
-// {
-//     {GIMBAL_ADDRESS, "can1_0x500_to_0x600"},
-//     {MANIFOLD2_ADDRESS, "usb"},
-// };
+struct route_obj chassis_route_table[] =
+{
+    {MANIFOLD2_ADDRESS, "usb"},
+};
 
 /**
   * @brief  chassis app init
@@ -88,8 +81,6 @@ void chassis_app_init(void)
 {
     struct app_manage *app;
     chassis_t p_chassis;
-
-    // protocol_can_interface_register("can1_0x500_to_0x600", 1024, 1, CAN1_PORT, GIMBAL_CAN_ID, CHASSIS_CAN_ID, can1_std_transmit);
 
     app = get_current_app();
     p_chassis = get_chassis();
@@ -103,9 +94,8 @@ void chassis_app_init(void)
     app->offline_table = chassis_offline_table;
     app->offline_tab_size = sizeof(chassis_offline_table) / sizeof(struct offline_obj);
 
-    // app->route_table = chassis_route_table;
-    // app->route_tab_size = sizeof(chassis_route_table) / sizeof(struct route_obj);
-    app->route_table = NULL;
+    app->route_table = chassis_route_table;
+    app->route_tab_size = sizeof(chassis_route_table) / sizeof(struct route_obj);
 
     app->can2_msg_callback = chassis_can2_callback;
     app->dbus_rx_complete = chassis_dbus_rx_complete;
@@ -235,16 +225,6 @@ void chassis_control_online(void)
 {
     LED_B_OFF();
 }
-
-// void gimbal_info_offline(void)
-// {
-//     set_follow_relative(0);
-// }
-
-// void gimbal_info_online(void)
-// {
-//     return;
-// }
 
 void referee_data_send2pc(uint16_t cmd_id, uint8_t *pdata, uint16_t len)
 {
