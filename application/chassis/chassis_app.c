@@ -18,12 +18,16 @@
 #include "os_timer.h"
 #include "app_manage.h"
 #include "chassis_cmd.h"
+
 #include "chassis_task.h"
+#include "upper_task.h"
+
 #include "protocol.h"
 #include "board.h"
 #include "easyflash.h"
 
 osThreadId chassis_task_t;
+osThreadId upper_task_t;
 
 static void chassis_can2_callback(uint16_t std_id, uint8_t *data, uint8_t dlc);
 static void chassis_user_key_handle(void);
@@ -109,6 +113,9 @@ void chassis_app_init(void)
 
     osThreadDef(CHASSIS_TASK, chassis_task, osPriorityNormal, 0, 512);
     chassis_task_t = osThreadCreate(osThread(CHASSIS_TASK), NULL);
+
+    osThreadDef(UPPER_TASK, upper_task, osPriorityNormal, 0, 512);
+    upper_task_t = osThreadCreate(osThread(UPPER_TASK), NULL);
 }
 
 /**
