@@ -18,6 +18,7 @@
         "USB_DEVICE/Target",
         "application",
         "application/chassis",
+        "application/upper",
         "boards",
         "components/algorithm",
         "components/bmi088",

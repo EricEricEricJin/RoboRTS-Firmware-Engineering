@@ -102,6 +102,7 @@ application/init.c \
 application/offline_service.c \
 application/sensor_task.c \
 application/shell.c \
+application/upper/upper_task.c \
 boards/board.c \
 boards/drv_bmi088.c \
 boards/drv_can.c \
@@ -124,6 +125,7 @@ components/devices/dbus.c \
 components/devices/device.c \
 components/devices/motor.c \
 components/devices/single_gyro.c \
+components/devices/stepper.c \
 components/easyflash/port/ef_port.c \
 components/easyflash/src/easyflash.c \
 components/easyflash/src/ef_env.c \
@@ -236,6 +238,7 @@ C_INCLUDES =  \
 -IUSB_DEVICE/Target \
 -Iapplication \
 -Iapplication/chassis \
+-Iapplication/upper \
 -Iboards \
 -Icomponents/algorithm \
 -Icomponents/bmi088 \
