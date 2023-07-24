@@ -10,14 +10,14 @@
 
 struct pid_param lift_outer_param =
     {
-        .p = 100.0f,
-        .max_out = 600.0f};
+        .p = 1200.0f,
+        .max_out = 6000.0f};
 
 struct pid_param lift_inter_param =
     {
         .p = 6.5f,
         .i = 0.1f,
-        .max_out = 15000,
+        .max_out = 30000,
         .integral_limit = 500,
 };
 
