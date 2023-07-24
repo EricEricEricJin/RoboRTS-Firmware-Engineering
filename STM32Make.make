@@ -102,6 +102,7 @@ application/init.c \
 application/offline_service.c \
 application/sensor_task.c \
 application/shell.c \
+application/upper/lift.c \
 application/upper/upper_task.c \
 boards/board.c \
 boards/drv_bmi088.c \
