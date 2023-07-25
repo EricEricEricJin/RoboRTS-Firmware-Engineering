@@ -9,7 +9,7 @@ typedef struct lift *lift_t;
 struct lift
 {
     float target_position; // unit: mm
-    struct pid outer_pid;
+    struct pid outer_pid[2];
     struct pid inter_pid[2];
     struct motor_device motor[2];
 };

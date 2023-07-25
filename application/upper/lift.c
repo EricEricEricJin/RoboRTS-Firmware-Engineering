@@ -24,6 +24,7 @@ int32_t lift_cascade_init(struct lift *lift, const char *name,
         lift->motor[i].can_id = 0x205 + i; // 0x205 and 0x206
         lift->motor[i].init_offset_f = 1;
         
+        pid_struct_init(&lift->outer_pid[i], outer_param.max_out, outer_param.integral_limit, outer_param.p, outer_param.i, outer_param.d);    
         pid_struct_init(&(lift->inter_pid[i]), inter_param.max_out, inter_param.integral_limit, inter_param.p, inter_param.i, inter_param.d);
         
         err = motor_register(&(lift->motor[i]), motor_name[i]);
@@ -34,7 +35,6 @@ int32_t lift_cascade_init(struct lift *lift, const char *name,
     }
 
     // initialize outer pid
-    pid_struct_init(&lift->outer_pid, outer_param.max_out, outer_param.integral_limit, outer_param.p, outer_param.i, outer_param.d);    
 
     return E_OK;
 end:
@@ -48,26 +48,25 @@ int32_t lift_cascade_calculate(struct lift *lift)
     float outer_out; // target speed, output by outer PID
     float motor_out; // current sent to motor
     float sensor_rnd, sensor_rpm;
-    struct motor_data* pdata[2];
+    struct motor_data* pdata;
+    float target_position;
 
     for (int i = 0; i < 2; i++)
     {
-        pdata[i] = motor_get_data(&(lift->motor[i]));
+        pdata = motor_get_data(&(lift->motor[i]));
+        sensor_rnd = (pdata->total_angle / 360.0f); // unit: round
+        sensor_rpm = (pdata->speed_rpm);
+
+        if (i == 0)
+            target_position = lift->target_position;
+        else
+            target_position = -(lift->target_position);
+        
+        outer_out = pid_calculate(&(lift->outer_pid[i]), sensor_rnd, target_position);
+        motor_out = pid_calculate(&(lift->inter_pid[i]), sensor_rpm, outer_out);
+        motor_set_current(&(lift->motor[i]), (int16_t)(motor_out));
     }
 
-    sensor_rnd = (pdata[0]->total_angle / 360.0f); // unit: round
-    outer_out = pid_calculate(&(lift->outer_pid), sensor_rnd, lift->target_position);
-
-    // motor 0
-    sensor_rpm = (pdata[0]->speed_rpm);
-    motor_out = pid_calculate(&(lift->inter_pid[0]), sensor_rpm, outer_out);
-    motor_set_current(&(lift->motor[0]), (int16_t)(motor_out));
-
-    // motor 1
-    sensor_rpm = (pdata[1]->speed_rpm);
-    motor_out = pid_calculate(&(lift->inter_pid[1]), sensor_rpm, -outer_out);
-    motor_set_current(&(lift->motor[1]), (int16_t)(motor_out));
-   
     return E_OK;
 }
 
