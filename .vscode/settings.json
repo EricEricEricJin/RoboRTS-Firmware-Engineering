@@ -19,7 +19,8 @@
         "engineering_cmd.h": "c",
         "chassis.h": "c",
         "os_timer.h": "c",
-        "chassis_cmd.h": "c"
+        "chassis_cmd.h": "c",
+        "log.h": "c"
     },
     "cortex-debug.openocdPath": "D:\\OPENOCD\\BIN\\OPENOCD.EXE"
 }
