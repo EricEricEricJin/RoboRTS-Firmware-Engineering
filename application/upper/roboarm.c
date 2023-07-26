@@ -63,14 +63,20 @@ int32_t roboarm_cascade_calculate(struct roboarm* roboarm)
 
     float outer_out, motor_out, sensor_angle, sensor_rate; // unit: deg, deg/s
     struct motor_data* pdata;
+    float target_angle;
 
     // pitch
     pdata = motor_get_data(&(roboarm->pitch_motor));
     ANGLE_LIMIT_180(sensor_angle, pdata->ecd / ENCODER_ANGLE_RATIO - ROBOARM_PITCH_OFFSET);
     sensor_rate = pdata->speed_rpm * 6;
-    // log_i("Angle: %d, Rate:%d", (int)sensor_angle, (int)sensor_rate);
+    target_angle = roboarm->pitch_target;
 
-    outer_out = pid_calculate(&(roboarm->pitch_outer_pid), sensor_angle, roboarm->pitch_target);
+    if (target_angle - sensor_angle > 180)
+        sensor_angle += 360;
+    else if (target_angle - sensor_angle < -180)
+        sensor_angle -=360 ;
+
+    outer_out = pid_calculate(&(roboarm->pitch_outer_pid), sensor_angle, target_angle);
     motor_out = pid_calculate(&(roboarm->pitch_inter_pid), sensor_rate, outer_out);
     motor_set_current(&(roboarm->pitch_motor), (int16_t)(motor_out));
 
@@ -78,8 +84,14 @@ int32_t roboarm_cascade_calculate(struct roboarm* roboarm)
     pdata = motor_get_data(&(roboarm->roll_motor));
     ANGLE_LIMIT_180(sensor_angle, pdata->ecd / ENCODER_ANGLE_RATIO - ROBOARM_ROLL_OFFSET);
     sensor_rate = (pdata->ecd_raw_rate * 1000.0f / ENCODER_ANGLE_RATIO); // feedback frequency: 1000Hz
+    target_angle = roboarm->roll_target;
 
-    outer_out = pid_calculate(&(roboarm->roll_outer_pid), sensor_angle, roboarm->roll_target);
+    if (target_angle - sensor_angle > 180)
+        sensor_angle += 360;
+    else if (target_angle - sensor_angle < -180)
+        sensor_angle -=360 ;
+
+    outer_out = pid_calculate(&(roboarm->roll_outer_pid), sensor_angle, target_angle);
     motor_out = pid_calculate(&(roboarm->roll_inter_pid), sensor_rate, outer_out);
     motor_set_current(&(roboarm->roll_motor), (int16_t)(motor_out));
 

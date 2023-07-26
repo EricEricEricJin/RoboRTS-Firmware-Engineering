@@ -4,13 +4,13 @@
 #include "motor.h"
 #include "pid.h"
 
-#define ROBOARM_PITCH_OFFSET (0)
-#define ROBOARM_PITCH_MAX (120)
-#define ROBOARM_PITCH_MIN (-120)
+#define ROBOARM_PITCH_OFFSET (-90)
+#define ROBOARM_PITCH_MAX (60)
+#define ROBOARM_PITCH_MIN (-179)
 
 #define ROBOARM_ROLL_OFFSET (0)
-#define ROBOARM_ROLL_MAX (120)
-#define ROBOARM_ROLL_MIN (-120)
+#define ROBOARM_ROLL_MAX (90)
+#define ROBOARM_ROLL_MIN (-90)
 
 typedef struct roboarm *roboarm_t;
 
