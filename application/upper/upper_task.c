@@ -4,6 +4,9 @@
 #include "event.h"
 #include "os_timer.h"
 #include "log.h"
+#include "tim.h"
+
+#include "stepper.h"
 
 #include "upper_task.h"
 #include "lift.h"
@@ -73,6 +76,7 @@ void upper_task(void const *argument)
     // Initialize components
     lift_cascade_init(&lift, "Lift", lift_inter_param, lift_outer_param, DEVICE_CAN2);
     roboarm_cascade_init(&roboarm, "Roboarm", roboarm_pitch_inter_param, roboarm_pitch_outer_param, roboarm_roll_inter_param, roboarm_roll_outer_param, DEVICE_CAN2);
+    set_stepper_speed(0);
 
     float lift_delta;
     float roboarm_pitch_delta, roboarm_roll_delta;
@@ -103,6 +107,12 @@ void upper_task(void const *argument)
             roboarm_roll_delta = (p_rc_info->ch3) * (0.001f);
             roboarm_set_delta(&roboarm, roboarm_pitch_delta, roboarm_roll_delta);
             roboarm_cascade_calculate(&roboarm);
+
+            // stepper control
+            int16_t wheel = p_rc_info->wheel;
+            log_i("Wheel: %d", wheel);
+
+            set_stepper_speed(wheel / 33);
 
             break;
         default:

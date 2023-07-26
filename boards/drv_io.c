@@ -29,6 +29,9 @@ void pwm_device_init(void)
 
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
+    // Stepper
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+
     fric_set_output(1000, 1000);
     mpu_heat_output(0);
 }

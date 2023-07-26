@@ -1,7 +1,8 @@
 #include "stepper.h"
 #include "main.h"
+#include "tim.h"
 
-#define STEPPER_MMPS2HZ (30)
+#define STEPPER_MMPS2HZ (20)
 // TIM1 CH1 as PFM output
 // PB14 as DIR output
 
@@ -23,7 +24,7 @@ void set_freq(int freq)
     }
     else 
     {
-        TIM1->ARR = 10000 / freq - 1; // counter period
+        TIM1->ARR = 1000000 / freq - 1; // counter period
         TIM1->CCR1 = (TIM1->ARR + 1) / 2;
     }
 }
@@ -32,11 +33,11 @@ void set_dir(int dir)
 {
     if (dir >= 0)
     {
-        HAL_GPIO_WritePin(STEPPER_DIR_GPIO_Port, STEPPER_DIR_Pin, 1);
+        HAL_GPIO_WritePin(STEPPER_DIR_GPIO_Port, STEPPER_DIR_Pin, GPIO_PIN_SET);
     }
     else 
     {
-        HAL_GPIO_WritePin(STEPPER_DIR_GPIO_Port, STEPPER_DIR_Pin, 0);
+        HAL_GPIO_WritePin(STEPPER_DIR_GPIO_Port, STEPPER_DIR_Pin, GPIO_PIN_RESET);
     }
 }
 
