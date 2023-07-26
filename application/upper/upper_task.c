@@ -110,9 +110,18 @@ void upper_task(void const *argument)
 
             // stepper control
             int16_t wheel = p_rc_info->wheel;
-            log_i("Wheel: %d", wheel);
-
+            // log_i("Wheel: %d", wheel);
             set_stepper_speed(wheel / 33);
+
+            // pump control
+            if (rc_device_get_state(&upper_rc, RC_S2_UP) == E_OK)
+            {
+                HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_SET);
+            }
+            else
+            {
+                HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_RESET);
+            }
 
             break;
         default:

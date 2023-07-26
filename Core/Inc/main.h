@@ -100,14 +100,12 @@ void Error_Handler(void);
 #define INT1_GYRO_EXTI_IRQn EXTI9_5_IRQn
 #define DRIVER_CONFIG_Pin GPIO_PIN_12
 #define DRIVER_CONFIG_GPIO_Port GPIOB
-#define APP_CONFIG_Pin GPIO_PIN_13
-#define APP_CONFIG_GPIO_Port GPIOB
 #define CS1_GYRO_Pin GPIO_PIN_0
 #define CS1_GYRO_GPIO_Port GPIOB
 #define STEPPER_DIR_Pin GPIO_PIN_14
 #define STEPPER_DIR_GPIO_Port GPIOB
-#define PID_CONFIG_Pin GPIO_PIN_15
-#define PID_CONFIG_GPIO_Port GPIOB
+#define PUMP_Pin GPIO_PIN_15
+#define PUMP_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

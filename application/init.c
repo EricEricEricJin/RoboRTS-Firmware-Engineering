@@ -36,7 +36,6 @@
 #include "log.h"
 
 static uint8_t glb_driver_cfg;
-static uint8_t glb_pid_cfg;
 
 void system_config(void);
 void hw_init(void);
@@ -95,7 +94,6 @@ void services_task(void const *argument)
 void system_config(void)
 {
     glb_driver_cfg = HAL_GPIO_ReadPin(DRIVER_CONFIG_GPIO_Port, DRIVER_CONFIG_Pin);
-    glb_pid_cfg = HAL_GPIO_ReadPin(PID_CONFIG_GPIO_Port, PID_CONFIG_Pin);
 }
 
 void hw_init(void)
@@ -108,9 +106,4 @@ void hw_init(void)
 uint8_t get_driver_cfg(void)
 {
     return glb_driver_cfg;
-}
-
-uint8_t get_pid_cfg(void)
-{
-    return glb_pid_cfg;
 }

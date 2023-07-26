@@ -21,16 +21,9 @@
 #define JMP_DRIVER 0
 #define NOJMP_DRIVER 1
 
-#define JMP_PID 0
-#define NOJMP_PID 1
-
-#define JMP_SPEED 0
-#define NOJMP_SPEED 1
-
 #include "os_timer.h"
 
 uint8_t get_driver_cfg(void);
-uint8_t get_pid_cfg(void);
 void hw_init(void);
 void task_init(void);
 
