@@ -41,13 +41,13 @@ struct pid_param roboarm_roll_inter_param =
 
 struct pid_param roboarm_pitch_outer_param =
     {
-        .p = 40.0f,
-        .max_out = 2000,
+        .p = 300.0f,
+        .max_out = 3000,
 };
 
 struct pid_param roboarm_pitch_inter_param =
     {
-        .p = 6.0f,
+        .p = 10.0f,
         .i = 0.1f,
         .max_out = 30000,
         .integral_limit = 3000,

@@ -79,6 +79,8 @@ int32_t roboarm_cascade_calculate(struct roboarm* roboarm)
     outer_out = pid_calculate(&(roboarm->pitch_outer_pid), sensor_angle, target_angle);
     motor_out = pid_calculate(&(roboarm->pitch_inter_pid), sensor_rate, outer_out);
     motor_set_current(&(roboarm->pitch_motor), (int16_t)(motor_out));
+    // log_i("Pitch Motor Out: %d", (int16_t)motor_out);
+    log_i("pitch angle: %d", (int16_t)(pdata->ecd / ENCODER_ANGLE_RATIO));
 
     // roll
     pdata = motor_get_data(&(roboarm->roll_motor));

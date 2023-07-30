@@ -4,7 +4,7 @@
 #include "motor.h"
 #include "pid.h"
 
-#define ROBOARM_PITCH_OFFSET (-90)
+#define ROBOARM_PITCH_OFFSET (266)
 #define ROBOARM_PITCH_MAX (60)
 #define ROBOARM_PITCH_MIN (-179)
 
