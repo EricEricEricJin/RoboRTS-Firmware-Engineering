@@ -1,7 +1,7 @@
 #include "lift.h"
 #include "log.h"
 
-#define LIFT_DEG2MM 10
+#define MAX_RND 27
 
 int32_t lift_cascade_init(struct lift *lift, const char *name,
                           struct pid_param inter_param, struct pid_param outer_param,
@@ -57,6 +57,8 @@ int32_t lift_cascade_calculate(struct lift *lift)
         sensor_rnd = (pdata->total_angle / 360.0f); // unit: round
         sensor_rpm = (pdata->speed_rpm);
 
+        log_i("rnd%d=%.1f", i, sensor_rnd);
+
         if (i == 0)
             target_position = lift->target_position;
         else
@@ -74,10 +76,19 @@ int32_t lift_cascade_calculate(struct lift *lift)
 int32_t lift_set_position(struct lift* lift, float position)
 {
     device_assert(lift != NULL);
+    if (position < 0 || position >= MAX_RND)
+        return E_OK;
     lift->target_position = position;
+    return E_OK;
 }
 
 int32_t lift_set_delta(struct lift* lift, float delta)
 {
+    device_assert(lift != NULL);
     lift->target_position += delta;
+    if (lift->target_position < 0)
+        lift->target_position = 0;
+    else if (lift->target_position > MAX_RND)
+        lift->target_position = MAX_RND;
+    return E_OK;
 }
