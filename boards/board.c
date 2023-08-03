@@ -40,7 +40,8 @@ static publisher_t dbusPub;
 static publisher_t uwbPub;
 
 static int32_t motor_canstd_send(enum device_can can, struct can_msg msg);
-static int32_t motor_can_output_1ms(void *argc);
+// static int32_t motor_can_output_1ms(void *argc);
+static int32_t motor_can_output_2ms(void *argc);
 static int32_t uwb_rcv_callback(CAN_RxHeaderTypeDef *header, uint8_t *rx_data);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -222,7 +223,8 @@ void board_config(void)
     soft_timer_register(green_led_toggle, &status_led_period, 5);
 
     motor_can_send_register(motor_canstd_send);
-    soft_timer_register(motor_can_output_1ms, NULL, 1);
+    // soft_timer_register(motor_can_output_1ms, NULL, 1);
+    soft_timer_register(motor_can_output_2ms, NULL, 2);
 
     /* dbus callback init */
     // dr16_uart_init(dr16_rx_data_by_uart, dr16_forward_by_can);
@@ -244,7 +246,13 @@ void board_config(void)
     protocol_uart_interface_register("usb", 1024, 1, USB_COM, usb_interface_send);
 }
 
-int32_t motor_can_output_1ms(void *argc)
+// int32_t motor_can_output_1ms(void *argc)
+// {
+//     motor_can_output(DEVICE_CAN_ALL);
+//     return 0;
+// }
+
+int32_t motor_can_output_2ms(void *argc)
 {
     motor_can_output(DEVICE_CAN_ALL);
     return 0;
