@@ -27,6 +27,8 @@
 #include "offline_service.h"
 #include "init.h"
 
+#include "log.h"
+
 struct pid_param chassis_motor_param =
     {
         .p = 6.5f,
@@ -73,7 +75,7 @@ void chassis_task(void const *argument)
 
     pid_struct_init(&pid_follow, MAX_CHASSIS_VW_SPEED, 50, 8.0f, 0.0f, 2.0f);
 
-    float local_ch3;
+
     while (1)
     {
         /* dr16 data update */
@@ -84,15 +86,34 @@ void chassis_task(void const *argument)
         chassis_gyro_updata(&chassis, chassis_gyro.yaw * RAD_TO_DEG, chassis_gyro.gz * RAD_TO_DEG);
 
         // Chassis movement
-        vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-        vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
-        wz = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VW_SPEED;
+        if (p_rc_info->kb.key_code != 0 || p_rc_info->mouse.x != 0)
+        {
+            if (p_rc_info->kb.bit.W)
+                vx = MAX_CHASSIS_VX_SPEED;
+            else if (p_rc_info->kb.bit.S)
+                vx = -MAX_CHASSIS_VX_SPEED;
+            
+            if (p_rc_info->kb.bit.A)
+                vy = MAX_CHASSIS_VY_SPEED;
+            else if (p_rc_info->kb.bit.D)
+                vy = -MAX_CHASSIS_VY_SPEED;
+
+            wz = -p_rc_info->mouse.x / 2.0f;
+            VAL_LIMIT(wz, -MAX_CHASSIS_VW_SPEED, MAX_CHASSIS_VW_SPEED);
+        }
+        else 
+        {
+            vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+            vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
+            wz = -(float)p_rc_info->ch3 / 660 * MAX_CHASSIS_VW_SPEED;
+        }
+
         chassis_set_offset(&chassis, 0, 0);
         chassis_set_acc(&chassis, 0, 0, 0);
         chassis_set_speed(&chassis, vx, vy, wz);
 
-        // Lift
-
+        // log_i("key=%d", (int)(p_rc_info->kb.bit.W));
+        log_i("%d %d %d", p_rc_info->mouse.x, p_rc_info->mouse.y, p_rc_info->mouse.z);
 
         osDelay(5);
     }
