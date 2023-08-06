@@ -4,9 +4,11 @@
 #include "motor.h"
 #include "pid.h"
 
-#define ROBOARM_PITCH_OFFSET (266)
+#define ROBOARM_PITCH_OFFSET (170)
 #define ROBOARM_PITCH_MAX (60)
 #define ROBOARM_PITCH_MIN (-179)
+
+#define ROBOARM_PITCH_DEADZONE (110)
 
 #define ROBOARM_ROLL_OFFSET (0)
 #define ROBOARM_ROLL_MAX (90)
@@ -24,7 +26,7 @@ struct roboarm
     struct pid roll_outer_pid;
     struct pid roll_inter_pid;
 
-    struct motor_device pitch_motor;
+    struct motor_device pitch_motor[2];
     struct motor_device roll_motor;
 };
 
