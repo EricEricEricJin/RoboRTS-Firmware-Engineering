@@ -92,13 +92,13 @@ void upper_task(void const *argument)
             lift_delta = 0;
             // SHIFT: up, CTRL: down
             if (p_rc_info->kb.bit.SHIFT)
-                lift_delta = 0.04;
+                lift_delta = 0.05;
             else if (p_rc_info->kb.bit.CTRL)
-                lift_delta = -0.04;
+                lift_delta = -0.05;
             else if (rc_device_get_state(&upper_rc, RC_S1_UP) == E_OK)
-                lift_delta = 0.04;
+                lift_delta = 0.05;
             else if (rc_device_get_state(&upper_rc, RC_S1_DOWN) == E_OK)
-                lift_delta = -0.04;
+                lift_delta = -0.05;
 
             // log_i("Lift target: %d", (int)(lift.target_position));
             lift_set_delta(&lift, lift_delta);
