@@ -10,9 +10,9 @@
 
 #define ROBOARM_PITCH_DEADZONE (110)
 
-#define ROBOARM_ROLL_OFFSET (0)
-#define ROBOARM_ROLL_MAX (90)
-#define ROBOARM_ROLL_MIN (-90)
+// #define ROBOARM_ROLL_OFFSET (0)
+// #define ROBOARM_ROLL_MAX (90)
+// #define ROBOARM_ROLL_MIN (-90)
 
 typedef struct roboarm *roboarm_t;
 

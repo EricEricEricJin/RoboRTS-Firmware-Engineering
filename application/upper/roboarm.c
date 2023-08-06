@@ -107,7 +107,7 @@ int32_t roboarm_cascade_calculate(struct roboarm* roboarm)
 
     // roll
     pdata = motor_get_data(&(roboarm->roll_motor));
-    ANGLE_LIMIT_180(sensor_angle, pdata->ecd / ENCODER_ANGLE_RATIO - ROBOARM_ROLL_OFFSET);
+    ANGLE_LIMIT_180_PM(sensor_angle, pdata->ecd / ENCODER_ANGLE_RATIO);
     sensor_rate = (pdata->ecd_raw_rate * 1000.0f / ENCODER_ANGLE_RATIO); // feedback frequency: 1000Hz
     target_angle = roboarm->roll_target;
 
@@ -129,8 +129,7 @@ int32_t roboarm_set_position(struct roboarm* roboarm, float pitch, float roll)
 {
     roboarm->pitch_target = pitch;
     VAL_LIMIT(roboarm->pitch_target, ROBOARM_PITCH_MIN, ROBOARM_PITCH_MAX);
-    roboarm->roll_target = roll;
-    VAL_LIMIT(roboarm->roll_target, ROBOARM_ROLL_MIN, ROBOARM_ROLL_MAX);
+    ANGLE_LIMIT_180_PM(roboarm->roll_target, roll);
     return E_OK;
 }
 
@@ -138,7 +137,6 @@ int32_t roboarm_set_delta(struct roboarm* roboarm, float delta_pitch, float delt
 {
     roboarm->pitch_target += delta_pitch;
     VAL_LIMIT(roboarm->pitch_target, ROBOARM_PITCH_MIN, ROBOARM_PITCH_MAX);
-    roboarm->roll_target += delta_roll;
-    VAL_LIMIT(roboarm->roll_target, ROBOARM_ROLL_MIN, ROBOARM_ROLL_MAX);
+    ANGLE_LIMIT_180_PM(roboarm->roll_target, roboarm->roll_target + delta_roll);
     return E_OK;
 }
