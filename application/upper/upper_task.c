@@ -95,12 +95,9 @@ void upper_task(void const *argument)
                 lift_delta = 0.05;
             else if (p_rc_info->kb.bit.CTRL)
                 lift_delta = -0.05;
-            else if (rc_device_get_state(&upper_rc, RC_S1_UP) == E_OK)
-                lift_delta = 0.05;
-            else if (rc_device_get_state(&upper_rc, RC_S1_DOWN) == E_OK)
-                lift_delta = -0.05;
+            else
+                lift_delta = -(p_rc_info->wheel / 10000.0f); 
 
-            // log_i("Lift target: %d", (int)(lift.target_position));
             lift_set_delta(&lift, lift_delta);
             lift_cascade_calculate(&lift);
 
@@ -112,6 +109,8 @@ void upper_task(void const *argument)
                 roboarm_roll_delta = 0.7;
             else
                 roboarm_roll_delta = 0;
+            
+            log_i("delta=%.1f", roboarm_roll_delta);
             
             if (p_rc_info->kb.bit.R)
                 roboarm_pitch_delta = 0.7;
@@ -128,8 +127,10 @@ void upper_task(void const *argument)
             int16_t stepper_speed = 0;
             if (p_rc_info->mouse.z)
                 stepper_speed = p_rc_info->mouse.z;
-            else
-                stepper_speed = p_rc_info->wheel / 33;
+            else if (rc_device_get_state(&upper_rc, RC_S1_UP) == E_OK)
+                stepper_speed = 20;
+            else if (rc_device_get_state(&upper_rc, RC_S1_DOWN) == E_OK)
+                stepper_speed = -20;
             
             VAL_LIMIT(stepper_speed, -20, 20);
             set_stepper_speed(stepper_speed);
@@ -140,9 +141,9 @@ void upper_task(void const *argument)
                 HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_SET);
             else if (p_rc_info->mouse.r)
                 HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_RESET);
-            else if (rc_device_get_state(&upper_rc, RC_S2_UP) == E_OK)
+            else if (rc_device_get_state(&upper_rc, RC_S2_MID2UP) == E_OK)
                 HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_SET);
-            else
+            else if (rc_device_get_state(&upper_rc, RC_S2_UP2MID) == E_OK)
                 HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_RESET);
 
             break;

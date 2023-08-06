@@ -55,7 +55,7 @@ int32_t lift_cascade_calculate(struct lift *lift)
         sensor_rnd = (pdata->total_angle / 360.0f); // unit: round
         sensor_rpm = (pdata->speed_rpm);
 
-        log_i("rnd%d=%.1f", i, sensor_rnd);
+        // log_i("rnd%d=%.1f", i, sensor_rnd);
 
         if (i == 0)
             target_position = lift->target_position;

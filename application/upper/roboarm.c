@@ -137,6 +137,8 @@ int32_t roboarm_set_delta(struct roboarm* roboarm, float delta_pitch, float delt
 {
     roboarm->pitch_target += delta_pitch;
     VAL_LIMIT(roboarm->pitch_target, ROBOARM_PITCH_MIN, ROBOARM_PITCH_MAX);
-    ANGLE_LIMIT_180_PM(roboarm->roll_target, roboarm->roll_target + delta_roll);
+    float new_roll = roboarm->roll_target + delta_roll;
+    ANGLE_LIMIT_180_PM(roboarm->roll_target, new_roll);
+    log_i("tar=%.1f", roboarm->roll_target);
     return E_OK;
 }
