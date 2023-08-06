@@ -47,7 +47,7 @@ struct pid_param roboarm_pitch_outer_param =
 
 struct pid_param roboarm_pitch_inter_param =
     {
-        .p = 10.0f,
+        .p = 6.0f,
         .i = 0.1f,
         .max_out = 30000,
         .integral_limit = 3000,
@@ -90,38 +90,60 @@ void upper_task(void const *argument)
         case NORMAL_MODE:
             // lift control
             lift_delta = 0;
-            if (rc_device_get_state(&upper_rc, RC_S1_UP) == E_OK)
-            {
+            // SHIFT: up, CTRL: down
+            if (p_rc_info->kb.bit.SHIFT)
                 lift_delta = 0.04;
-            }
-            else if (rc_device_get_state(&upper_rc, RC_S1_DOWN) == E_OK)
-            {
+            else if (p_rc_info->kb.bit.CTRL)
                 lift_delta = -0.04;
-            }
+            else if (rc_device_get_state(&upper_rc, RC_S1_UP) == E_OK)
+                lift_delta = 0.04;
+            else if (rc_device_get_state(&upper_rc, RC_S1_DOWN) == E_OK)
+                lift_delta = -0.04;
+
             // log_i("Lift target: %d", (int)(lift.target_position));
             lift_set_delta(&lift, lift_delta);
             lift_cascade_calculate(&lift);
 
             // roboarm control
-            roboarm_pitch_delta = (p_rc_info->ch4) * (0.001f);
-            roboarm_roll_delta = (p_rc_info->ch3) * (0.001f);
+            // QE: roll, RF: pitch
+            if (p_rc_info->kb.bit.Q)
+                roboarm_roll_delta = -0.7;
+            else if (p_rc_info->kb.bit.E)
+                roboarm_roll_delta = 0.7;
+            else
+                roboarm_roll_delta = 0;
+            
+            if (p_rc_info->kb.bit.R)
+                roboarm_pitch_delta = 0.7;
+            else if (p_rc_info->kb.bit.F)
+                roboarm_pitch_delta = -0.7;
+            else             
+                roboarm_pitch_delta = (p_rc_info->ch4) * (0.001f);
+
+
             roboarm_set_delta(&roboarm, roboarm_pitch_delta, roboarm_roll_delta);
             roboarm_cascade_calculate(&roboarm);
 
             // stepper control
-            int16_t wheel = p_rc_info->wheel;
-            // log_i("Wheel: %d", wheel);
-            set_stepper_speed(wheel / 33);
+            int16_t stepper_speed = 0;
+            if (p_rc_info->mouse.z)
+                stepper_speed = p_rc_info->mouse.z;
+            else
+                stepper_speed = p_rc_info->wheel / 33;
+            
+            VAL_LIMIT(stepper_speed, -20, 20);
+            set_stepper_speed(stepper_speed);
 
             // pump control
-            if (rc_device_get_state(&upper_rc, RC_S2_UP) == E_OK)
-            {
+            // mouse left
+            if (p_rc_info->mouse.l)
                 HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_SET);
-            }
-            else
-            {
+            else if (p_rc_info->mouse.r)
                 HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_RESET);
-            }
+            else if (rc_device_get_state(&upper_rc, RC_S2_UP) == E_OK)
+                HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_SET);
+            else
+                HAL_GPIO_WritePin(PUMP_GPIO_Port, PUMP_Pin, GPIO_PIN_RESET);
 
             break;
         default:

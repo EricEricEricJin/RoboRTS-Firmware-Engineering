@@ -1,7 +1,7 @@
 #include "lift.h"
 #include "log.h"
 
-#define MAX_RND 27
+#define MAX_RND 20
 
 int32_t lift_cascade_init(struct lift *lift, const char *name,
                           struct pid_param inter_param, struct pid_param outer_param,
@@ -33,8 +33,6 @@ int32_t lift_cascade_init(struct lift *lift, const char *name,
             goto end;
         }
     }
-
-    // initialize outer pid
 
     return E_OK;
 end:

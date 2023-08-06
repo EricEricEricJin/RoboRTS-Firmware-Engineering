@@ -113,7 +113,7 @@ void chassis_task(void const *argument)
         chassis_set_speed(&chassis, vx, vy, wz);
 
         // log_i("key=%d", (int)(p_rc_info->kb.bit.W));
-        log_i("%d %d %d", p_rc_info->mouse.x, p_rc_info->mouse.y, p_rc_info->mouse.z);
+        // log_i("%d %d %d", p_rc_info->mouse.x, p_rc_info->mouse.y, p_rc_info->mouse.z);
 
         osDelay(5);
     }
